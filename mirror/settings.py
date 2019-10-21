@@ -25,7 +25,7 @@ SECRET_KEY = 'o-44az=l6$z4r5)8-u0le9tek*1e#wp=(m)o!r--+$y81x*!1+'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['mirror-service.herokuapp.com']
 
 # Application definition
 
