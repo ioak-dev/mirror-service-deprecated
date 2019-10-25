@@ -13,10 +13,10 @@ class JWTAuthenticationMiddleware(MiddlewareMixin):
         if request.path.startswith('/auth'):
             return
 
-        claim = jwt.decode(request.headers.get('Authorization'), 'secret', algorithms=['HS256'])
-        request.claim = claim
-
-        if request.headers.get('Authorization') != '123':
+        try:
+            claim = jwt.decode(request.headers.get('Authorization'), 'jwtsecret', algorithms=['HS256'])
+            request.claim = claim
+        except jwt.exceptions.DecodeError:
             raise PermissionDenied
         
         return
