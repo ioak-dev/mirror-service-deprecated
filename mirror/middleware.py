@@ -10,7 +10,7 @@ class JWTAuthenticationMiddleware(MiddlewareMixin):
         if JWTAuthenticationMiddleware.is_json(request.body):
             request._body = json.loads(request.body)
 
-        if request.path.startswith('/auth'):
+        if request.path.startswith('/auth') | request.path.startswith('/tenant'):
             return
 
         try:
@@ -32,4 +32,6 @@ class JWTAuthenticationMiddleware(MiddlewareMixin):
 class CorsMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
         response["Access-Control-Allow-Origin"] = "*"
+        response["Access-Control-Allow-Methods"] = "GET, POST, PATCH, PUT, DELETE, OPTIONS"
+        response["Access-Control-Allow-Headers"] = "Origin, Content-Type, X-Auth-Token"
         return response
