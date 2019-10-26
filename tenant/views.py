@@ -14,9 +14,8 @@ def create(request):
     if response[0] == 200:
         response = do_signup(request.body.get('tenantName'), {
             'email': request.body.get('email'),
-            'password': request.body.get('password'),
-            'solution': request.body.get('solution'),
-            'salt': request.body.get('salt')
+            'problem': request.body.get('problem'),
+            'solution': request.body.get('solution')
         })
         return JsonResponse(response[1], status=response[0])
     else:
