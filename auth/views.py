@@ -17,7 +17,7 @@ def signup(request, tenant):
 @api_view(['GET'])
 def getKeys(request, tenant, email):
     response = get_keys(tenant, email)
-    return JsonResponse(response[1], status=response[0])
+    return HttpResponse(response[1].get('problem'), status=response[0])
 
 @api_view(['POST'])
 def signin(request, tenant):
