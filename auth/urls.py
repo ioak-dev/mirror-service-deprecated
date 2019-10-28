@@ -7,5 +7,6 @@ urlpatterns = [
     path('keys', views.keys),
     path('keys/<str:email>/', views.getKeys),
     path('signup', views.signup),
-    path('signin', views.signin)
+    path('signin', views.signin),
+    path('jwttest', views.jwtTest)
 ]

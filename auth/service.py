@@ -41,10 +41,15 @@ def do_signin(tenant, data):
             'secret': 'none'
         })
 
-def jwtTest():
-    en = jwt.encode({'some': 'payload', 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=3)}, 'secret', algorithm='HS256')
-    print(jwt.decode(en, 'secret', algorithms=['HS256']))
+def do_jwttest(tenant):
+    return (200, jwt.encode({
+        'some': 'payload',
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=3)
+        }, 'replace_with_tenant_jwt_password', algorithm='HS256'))
+
+
+    # print(jwt.decode(en, 'secret', algorithms=['HS256']))
     # time.sleep(10)
     # print(jwt.decode(en, 'secret', algorithms=['HS256'], verify=False))
     # print(jwt.decode(en, 'secret', algorithms=['HS256']))
-    return jwt.encode({'some': 'payload', 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=30)}, 'secret', algorithm='HS256')
+    # return jwt.encode({'some': 'payload', 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=30)}, 'secret', algorithm='HS256')
