@@ -9,7 +9,8 @@ import json
 def create(request):
     response = do_create({
         'name': request.body.get('tenantName'),
-        'ownerEmail': request.body.get('email')
+        'ownerEmail': request.body.get('email'),
+        'jwtPassword':request.body.get('email')
     })
     if response[0] == 200:
         response = do_signup(request.body.get('tenantName'), {

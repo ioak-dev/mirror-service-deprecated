@@ -41,11 +41,16 @@ def do_signin(tenant, data):
             'secret': 'none'
         })
 
-def do_jwttest(tenant):
+def do_jwttest(tenant,data):
+    user=get_collection('mirror','tenant').find_one({'name': tenant})
+    jwtPassword = user.get('jwtPassword')
+    jwtToken = data.get('jwtToken')
+    tokenData = jwt.decode(jwtToken,jwtPassword, algorithm='HS256')
+    userid = str(tokenData['name'])
     return (200, jwt.encode({
-        'some': 'payload',
+        'user': userid,
         'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=3)
-        }, 'replace_with_tenant_jwt_password', algorithm='HS256'))
+        }, jwtPassword, algorithm='HS256'))
 
 
     # print(jwt.decode(en, 'secret', algorithms=['HS256']))

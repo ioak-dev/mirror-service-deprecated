@@ -25,7 +25,7 @@ def signin(request, tenant):
     return JsonResponse(response[1], status=response[0])
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 def jwtTest(request, tenant):
-    response = do_jwttest(tenant)
+    response = do_jwttest(tenant, request.body)
     return HttpResponse(response[1], status=response[0])
