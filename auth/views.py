@@ -28,4 +28,4 @@ def signin(request, tenant):
 @api_view(['POST'])
 def jwtTest(request, tenant):
     response = do_jwttest(tenant, request.body)
-    return HttpResponse(response[1], status=response[0])
+    return JsonResponse(response[1], status=response[0])

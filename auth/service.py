@@ -47,11 +47,19 @@ def do_jwttest(tenant,data):
     jwtToken = data.get('jwtToken')
     tokenData = jwt.decode(jwtToken,jwtPassword, algorithm='HS256')
     userid = str(tokenData['name'])
-    return (200, jwt.encode({
-        'user': userid,
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=3)
-        }, jwtPassword, algorithm='HS256'))
-
+    if userid :
+        return (200, {
+            'name': user.get('name'),
+            'email': user.get('ownerEmail'),
+            'token': jwt.encode({
+                   'name': userid,
+                   'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=3)
+                }, jwtPassword, algorithm='HS256').decode('utf-8'),
+            'tenant': tenant,
+            'secret': 'none'
+        })
+    elif userid is None:
+        return (500, {})
 
     # print(jwt.decode(en, 'secret', algorithms=['HS256']))
     # time.sleep(10)
