@@ -24,3 +24,10 @@ def do_get_banner(tenant):
     else:
         return (404, None)
 
+
+def do_get_tenant(tenant):
+    tenantData = get_collection('mirror','tenant').find_one({'name': tenant})
+    tenantData['_id'] = str(tenantData['_id'])
+    tenantData.pop('banner', None)
+    return (200, tenantData)
+

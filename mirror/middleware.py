@@ -6,7 +6,6 @@ from django.core.exceptions import PermissionDenied
 
 class JWTAuthenticationMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        print(request.method)
         if JWTAuthenticationMiddleware.is_json(request.body):
             request._body = json.loads(request.body)
 

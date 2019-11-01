@@ -1,7 +1,7 @@
 from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view
 from django.core import serializers
-from tenant.service import do_create, do_get_banner
+from tenant.service import do_create, do_get_tenant, do_get_banner
 from auth.service import do_signup
 import json, base64
 
@@ -26,8 +26,12 @@ def create(request):
     else:
         return JsonResponse(response[1], status=response[0])
 
-
 @api_view(['GET'])
 def get_banner(request, tenant):
     response = do_get_banner(tenant)
     return HttpResponse(response[1], status=response[0])
+
+@api_view(['GET'])
+def get_tenant(request, tenant):
+    response = do_get_tenant(tenant)
+    return JsonResponse(response[1], status=response[0])
