@@ -4,5 +4,6 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns =[
-    path('create', views.create)
+    path('create', views.create),
+    path('<str:tenant>', views.get_banner)
 ]
