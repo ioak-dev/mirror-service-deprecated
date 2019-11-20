@@ -1,18 +1,33 @@
 from csv import reader
 from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view
-from deeplearning.service import get_dataset, add_dataset, clear_dataset
+import deeplearning.service as service
 
 # Create your views here.
 
 @api_view(['GET', 'POST', 'DELETE'])
 def dataset(request, tenant, datatype):
     if request.method == 'GET':
-        response = get_dataset(tenant, request.body.decode('utf-8'), datatype)
+        response = service.get_dataset(tenant, request.body.decode('utf-8'), datatype)
         return JsonResponse(response[1], status=response[0])
     elif request.method == 'POST':
-        response = add_dataset(tenant, request.body.decode('utf-8'), datatype)
+        response = service.add_dataset(tenant, request.body.decode('utf-8'), datatype)
         return JsonResponse(response[1], status=response[0])
     elif request.method == 'DELETE':
-        response = clear_dataset(tenant, request.body.decode('utf-8'), datatype)
+        response = service.clear_dataset(tenant, request.body.decode('utf-8'), datatype)
         return JsonResponse(response[1], status=response[0])
+
+
+@api_view(['POST', 'DELETE'])
+def model(request, tenant, network_name):
+    if request.method == 'POST':
+        response = service.create_model(tenant, network_name)
+        return JsonResponse(response[1], status=response[0])
+    elif request.method == 'DELETE':
+        response = service.remove_model(tenant, network_name)
+        return JsonResponse(response[1], status=response[0])
+
+@api_view(['POST'])
+def train_model(request, tenant, network_name):
+    response = service.train_model(tenant, network_name)
+    return JsonResponse(response[1], status=response[0])
