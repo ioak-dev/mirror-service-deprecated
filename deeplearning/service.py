@@ -28,5 +28,5 @@ def get_dataset(tenant, csv_data, datatype):
 
 
 def clear_dataset(tenant, csv_data, datatype):
-    response = get_collection(tenant, 'dataset_' + datatype).remove({})
+    response = get_collection(tenant, 'dataset_'  + datatype).remove({})
     return (200, {'count': response['n']})
