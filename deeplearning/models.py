@@ -80,8 +80,7 @@ class Model:
         test_dataset = test_dataset.batch(64)
 
         inputs = keras.Input(shape=(100,), name='digits')
-        x = keras.layers.Dense(64, activation='relu', name='dense_1')(inputs)
-        x = keras.layers.Dense(64, activation='relu', name='dense_2')(x)
+        x = keras.layers.Dense(6, activation='relu', name='dense_1')(inputs)
         outputs = keras.layers.Dense(label_count, activation='softmax', name='predictions')(x)
         self.model = keras.Model(inputs=inputs, outputs=outputs)
         self.model.compile(optimizer=keras.optimizers.RMSprop(learning_rate=1e-3),
