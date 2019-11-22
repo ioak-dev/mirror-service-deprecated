@@ -61,7 +61,7 @@ soupsieve==1.9.5
 sqlparse==0.3.0
 statsmodels==0.10.1
 tensorboard==2.0.1
-tensorflow==2.0.0
+tensorflow
 tensorflow-estimator==2.0.1
 tensorflow-hub==0.7.0
 termcolor==1.1.0
