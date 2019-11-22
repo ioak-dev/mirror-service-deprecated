@@ -43,7 +43,7 @@ class Model:
         return prediction
 
     def initialize_vectorizer(self, sentences):
-        self.vectorizer = CountVectorizer(min_df=0, lowercase=False, max_features=600)
+        self.vectorizer = CountVectorizer(min_df=0, lowercase=False, max_features=200)
         self.vectorizer.fit(sentences)
     
     def vectorize(self, df):
@@ -79,7 +79,7 @@ class Model:
         test_dataset = tf.data.Dataset.from_tensor_slices((X_test, y_test))
         test_dataset = test_dataset.batch(64)
 
-        inputs = keras.Input(shape=(600,), name='digits')
+        inputs = keras.Input(shape=(200,), name='digits')
         x = keras.layers.Dense(64, activation='relu', name='dense_1')(inputs)
         x = keras.layers.Dense(64, activation='relu', name='dense_2')(x)
         outputs = keras.layers.Dense(label_count, activation='softmax', name='predictions')(x)
