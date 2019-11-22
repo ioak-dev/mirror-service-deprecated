@@ -1,7 +1,7 @@
 from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view
 from django.core import serializers
-from tenant.service import do_create, do_get_tenant, do_get_banner, do_update_tenant, do_update_stage
+from tenant.service import do_create, do_get_tenant, do_get_banner, do_update_tenant
 from auth.service import do_signup
 import json, base64
 
