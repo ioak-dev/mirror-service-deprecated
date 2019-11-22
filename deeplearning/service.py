@@ -7,6 +7,7 @@ import os, json
 from deeplearning.models import Model, ModelContainer
 import library.nlp_utils as nlp_utils
 from sklearn.model_selection import train_test_split
+from library.collection_utils import list_to_dict
 
 DATABASE_URI = os.environ.get('DATABASE_URI')
 
@@ -14,7 +15,7 @@ def add_dataset(tenant, csv_data):
     df = pd.read_csv(StringIO(csv_data))
     print(df.groupby('label').count())
     df = df.dropna()
-    df, remain_df = train_test_split(df, train_size=10000, stratify=df['label'])
+    df, remain_df = train_test_split(df, train_size=20000, stratify=df['label'])
     print(df.groupby('label').count())
     get_collection(tenant, 'dataset').insert(df.to_dict('records'))
     # os.makedirs('dataset/' + tenant)
@@ -68,7 +69,18 @@ def predict(tenant, network_name, sentence):
     model = ModelContainer.get(tenant, network_name)
     sentence = nlp_utils.clean_text(sentence)
     prediction = model.predict(sentence)
-    print(type(prediction))
-    print(type(list(prediction)))
-    return (200, {'sentence': sentence, 'prediction': str(list(prediction))})
+    print(prediction)
+    ranks = prediction[0].argsort().argsort()
+    categories = get_collection(tenant, 'category').find({})
+    label_map = list_to_dict(list(categories), 'value', 'name')
+    print(type(prediction[0]))
+    print(type(prediction[0][0]))
+    outcome = []
+    for i in range(len(prediction[0])):
+        outcome.append({
+            'label': label_map.get(i),
+            'rank': str(ranks[i]),
+            'probability': str(prediction[0][i])
+        })
+    return (200, {'sentence': sentence, 'prediction': outcome})
     # return (200, {'sentence': sentence})

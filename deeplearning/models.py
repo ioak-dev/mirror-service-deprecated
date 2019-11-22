@@ -33,7 +33,7 @@ class Model:
         y_test = test_df['label'].values
 
         # self.logistic_regression((X_train, X_val, X_test), (y_train, y_val, y_test))
-        self.neural_network((X_train, X_val, X_test), (y_train, y_val, y_test))
+        self.neural_network((X_train, X_val, X_test), (y_train, y_val, y_test), df['label'].nunique())
 
     def predict(self, sentence):
         feature_vector = self.vectorize_sentence([sentence])
@@ -43,7 +43,7 @@ class Model:
         return prediction
 
     def initialize_vectorizer(self, sentences):
-        self.vectorizer = CountVectorizer(min_df=0, lowercase=False, max_features=6000)
+        self.vectorizer = CountVectorizer(min_df=0, lowercase=False, max_features=1000)
         self.vectorizer.fit(sentences)
     
     def vectorize(self, df):
@@ -63,7 +63,7 @@ class Model:
         score = classifier.score(X[2], y[2])
         print('Accuracy = ', score)
 
-    def neural_network(self, X, y):
+    def neural_network(self, X, y, label_count):
         y_train = y[0].astype('float32')
         y_val = y[1].astype('float32')
         y_test = y[2].astype('float32')
@@ -79,10 +79,10 @@ class Model:
         test_dataset = tf.data.Dataset.from_tensor_slices((X_test, y_test))
         test_dataset = test_dataset.batch(64)
 
-        inputs = keras.Input(shape=(6000,), name='digits')
+        inputs = keras.Input(shape=(1000,), name='digits')
         x = keras.layers.Dense(64, activation='relu', name='dense_1')(inputs)
         x = keras.layers.Dense(64, activation='relu', name='dense_2')(x)
-        outputs = keras.layers.Dense(43, activation='softmax', name='predictions')(x)
+        outputs = keras.layers.Dense(label_count, activation='softmax', name='predictions')(x)
         self.model = keras.Model(inputs=inputs, outputs=outputs)
         self.model.compile(optimizer=keras.optimizers.RMSprop(learning_rate=1e-3),
               loss='sparse_categorical_crossentropy',
