@@ -1,7 +1,7 @@
 from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view
 from django.core import serializers
-from tenant.service import do_create, do_get_tenant, do_get_banner
+from tenant.service import do_create, do_get_tenant, do_get_banner, do_update_tenant, do_update_stage
 from auth.service import do_signup
 import json, base64
 
@@ -34,4 +34,9 @@ def get_banner(request, tenant):
 @api_view(['GET'])
 def get_tenant(request, tenant):
     response = do_get_tenant(tenant)
+    return JsonResponse(response[1], status=response[0])
+
+@api_view(['PUT'])
+def add_stage(request,tenant):
+    response = do_update_tenant(tenant,request.body)
     return JsonResponse(response[1], status=response[0])

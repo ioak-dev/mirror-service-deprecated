@@ -31,3 +31,13 @@ def do_get_tenant(tenant):
     tenantData.pop('banner', None)
     return (200, tenantData)
 
+def do_update_tenant(tenant,data):
+    tenantData = get_collection('mirror','tenant').find_one({'name': tenant})
+    get_collection('mirror','tenant').update_one({
+        '_id' : (tenantData['_id'])
+    },{
+        '$set':{
+            'stage':data['data']
+        }
+    },upsert=True )
+    return (200, None)
