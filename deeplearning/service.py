@@ -4,8 +4,7 @@ from library.db_connection_factory import get_collection
 import pandas as pd
 from io import StringIO
 import os, json
-from deeplearning.domain.models import Model
-from deeplearning.domain import model_container
+from deeplearning.models import Model, ModelContainer
 
 DATABASE_URI = os.environ.get('DATABASE_URI')
 
@@ -35,15 +34,16 @@ def clear_dataset(tenant, csv_data, datatype):
 
 def create_model(tenant, network_name):
     model = Model(network_name)
-    model_container.add(tenant, network_name, model)
+    ModelContainer.add(tenant, network_name, model)
     return (200, {})
 
 def remove_model(tenant, network_name):
-    model_container.remove(tenant, network_name)
+    ModelContainer.remove(tenant, network_name)
     return (200, {})
     
 def train_model(tenant, network_name):
-    model = model_container.get(tenant, network_name)
+    create_model(tenant, network_name)
+    model = ModelContainer.get(tenant, network_name)
     if model == None:
         return (204, {'error': 'model not present uner network name [' + network_name + ']'})
     else:
@@ -56,6 +56,7 @@ def train_model(tenant, network_name):
         else:
             train_df.pop('_id')
             test_df.pop('_id')
-            model.train(train_df, test_df)
+            categories = get_collection(tenant, 'category').find({})
+            model.train(train_df, test_df, list(categories))
             return (200, {'train_dimension': train_df.shape, 'test_dimension': test_df.shape})
     
