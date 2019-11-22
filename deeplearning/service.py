@@ -15,7 +15,7 @@ def add_dataset(tenant, csv_data):
     df = pd.read_csv(StringIO(csv_data))
     print(df.groupby('label').count())
     df = df.dropna()
-    df, remain_df = train_test_split(df, train_size=20000, stratify=df['label'])
+    df, remain_df = train_test_split(df, train_size=10000, stratify=df['label'])
     print(df.groupby('label').count())
     get_collection(tenant, 'dataset').insert(df.to_dict('records'))
     # os.makedirs('dataset/' + tenant)
