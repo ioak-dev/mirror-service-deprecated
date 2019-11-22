@@ -8,100 +8,95 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
 import matplotlib.pyplot as plt
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
 class Model:
     def __init__(self, network_name):
         self.network_name = network_name
         plt.style.use('ggplot')
 
-    def train(self, train_df, test_df, label_list):
+    def train(self, df, label_list):
+        self.print_dataset_proportion([df])
         label_dict = collection_utils.list_to_dict(label_list, 'name', 'value')
-        train_df['label'] = train_df['label'].map(label_dict)
-        test_df['label'] = test_df['label'].map(label_dict)
-        train_df['text'] = train_df['text'].apply(nlp_utils.clean_text)
-        test_df['text'] = test_df['text'].apply(nlp_utils.clean_text)
-
+        df['label'] = df['label'].map(label_dict)
+        df['text'] = df['text'].apply(nlp_utils.clean_text)
+        train_df, remain_df = train_test_split(df, train_size=0.7, stratify=df['label'])
+        val_df, test_df = train_test_split(remain_df, train_size=0.1, stratify=remain_df['label'])
+        self.print_dataset_proportion([df, train_df, val_df, test_df])
+        
         self.initialize_vectorizer(train_df['text'].values)
-        X_train = self.vectorize(train_df['text'].values)
+        X_train = self.vectorize(train_df)
+        X_val = self.vectorize(val_df)
+        X_test = self.vectorize(test_df)
         y_train = train_df['label'].values
-        X_test = self.vectorize(test_df['text'].values)
+        y_val = val_df['label'].values
         y_test = test_df['label'].values
 
-        # self.logistic_regression(X_train, y_train, X_test, y_test)
-        self.neural_network(X_train, y_train, X_test, y_test)
+        # self.logistic_regression((X_train, X_val, X_test), (y_train, y_val, y_test))
+        self.neural_network((X_train, X_val, X_test), (y_train, y_val, y_test))
+
+    def predict(self, sentence):
+        feature_vector = self.vectorize_sentence([sentence])
+        print(feature_vector)
+        prediction = self.model.predict(feature_vector)
+        print(prediction)
+        return prediction
 
     def initialize_vectorizer(self, sentences):
-        self.vectorizer = CountVectorizer(min_df=0, lowercase=False, max_features=100)
+        self.vectorizer = CountVectorizer(min_df=0, lowercase=False, max_features=6000)
         self.vectorizer.fit(sentences)
     
-    def vectorize(self, sentences):
+    def vectorize(self, df):
+        sentences = df['text'].values
         return self.vectorizer.transform(sentences).toarray()
 
-    def logistic_regression(self, X_train, y_train, X_test, y_test):
+    def vectorize_sentence(self, sentence):
+        return self.vectorizer.transform(sentence).toarray()
+
+    def print_dataset_proportion(self, df_list):
+        for df in df_list:
+            print(df.groupby('label').count())
+
+    def logistic_regression(self, X, y):
         classifier = LogisticRegression()
-        classifier.fit(X_train, y_train)
-        score = classifier.score(X_test, y_test)
+        classifier.fit(X[0], y[0])
+        score = classifier.score(X[2], y[2])
         print('Accuracy = ', score)
 
-    def neural_network(self, X_train, y_train, X_test, y_test):
-        # training_df = pd.DataFrame.from_records(X_train)
-        # testing_df = pd.DataFrame.from_records(X_test)
-        # training_df_y = pd.DataFrame.from_records(y_train.reshape((-1,1)))
-        # testing_df_y = pd.DataFrame.from_records(y_test.reshape((-1,1)))
+    def neural_network(self, X, y):
+        y_train = y[0].astype('float32')
+        y_val = y[1].astype('float32')
+        y_test = y[2].astype('float32')
+        X_train = X[0].astype('float32')
+        X_val = X[1].astype('float32')
+        X_test = X[2].astype('float32')
+        print(X_train.shape, y_train.shape, type(X_train), type(y_train))
 
-        # train_dataset = (tf.data.Dataset.from_tensor_slices((
-        #     tf.cast(training_df.values, tf.float32),
-        #     tf.cast(training_df_y[0].values, tf.int32)
-        # )))
-        # test_dataset = (tf.data.Dataset.from_tensor_slices((
-        #     tf.cast(testing_df.values, tf.float32),
-        #     tf.cast(testing_df_y[0].values, tf.int32)
-        # )))
+        train_dataset = tf.data.Dataset.from_tensor_slices((X_train, y_train))
+        train_dataset = train_dataset.shuffle(buffer_size=1024).batch(64)
+        val_dataset = tf.data.Dataset.from_tensor_slices((X_val, y_val))
+        val_dataset = val_dataset.batch(64)
+        test_dataset = tf.data.Dataset.from_tensor_slices((X_test, y_test))
+        test_dataset = test_dataset.batch(64)
 
-        # (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
-        # print(x_train.shape, y_train.shape, type(x_train), type(y_train))
-        # x_train = x_train.reshape(60000, 784).astype('float32') / 255
-        # x_test = x_test.reshape(10000, 784).astype('float32') / 255
-
-        # y_train = y_train.astype('float32')
-        # y_test = y_test.astype('float32')
-        # print(x_train.shape, y_train.shape, type(x_train), type(y_train))
-        # train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
-        # train_dataset = train_dataset.shuffle(buffer_size=1024).batch(64)
-        # test_dataset = tf.data.Dataset.from_tensor_slices((x_test, y_test))
-        # test_dataset = test_dataset.shuffle(buffer_size=1024).batch(64)
-
-        # inputs = keras.Input(shape=(784,), name='digits')
-        # x = keras.layers.Dense(64, activation='relu', name='dense_1')(inputs)
-        # x = keras.layers.Dense(64, activation='relu', name='dense_2')(x)
-        # outputs = keras.layers.Dense(10, activation='softmax', name='predictions')(x)
-
-        # model = keras.Model(inputs=inputs, outputs=outputs)
-        # model.compile(optimizer=keras.optimizers.RMSprop(learning_rate=1e-3),
-        #       loss='sparse_categorical_crossentropy')
-        # model.summary()
-        # model.fit(train_dataset, epochs=3)
-        # return
-
-        model = tf.keras.Sequential([
-            tf.keras.layers.Dense(10, input_dim=X_train.shape[1], activation='relu'),
-            tf.keras.layers.Dense(10, activation='relu'),
-            tf.keras.layers.Dense(1, activation='sigmoid')
-        ])
-        model.compile(optimizer='adam',
-                        loss='binary_crossentropy',
-                        metrics=['accuracy'])
-        model.summary()
-        history = model.fit(X_train, y_train,
-            epochs=100,
-            verbose=False,
-            validation_data=(X_test, y_test))
+        inputs = keras.Input(shape=(6000,), name='digits')
+        x = keras.layers.Dense(64, activation='relu', name='dense_1')(inputs)
+        x = keras.layers.Dense(64, activation='relu', name='dense_2')(x)
+        outputs = keras.layers.Dense(43, activation='softmax', name='predictions')(x)
+        self.model = keras.Model(inputs=inputs, outputs=outputs)
+        self.model.compile(optimizer=keras.optimizers.RMSprop(learning_rate=1e-3),
+              loss='sparse_categorical_crossentropy',
+              metrics = ['accuracy'])
+        self.model.summary()
+        history = self.model.fit(train_dataset, epochs=30, validation_data=val_dataset)
         
-        loss, accuracy = model.evaluate(X_train, y_train, verbose=False)
-        print("Training Accuracy: {:.4f}".format(accuracy))
-        loss, accuracy = model.evaluate(X_test, y_test, verbose=False)
+        loss, accuracy = self.model.evaluate(train_dataset)
+        print("Training Accuracy:  {:.4f}".format(accuracy))
+        loss, accuracy = self.model.evaluate(val_dataset)
+        print("Validation Accuracy:  {:.4f}".format(accuracy))
+        loss, accuracy = self.model.evaluate(test_dataset)
         print("Testing Accuracy:  {:.4f}".format(accuracy))
-        self.plot_history(history)
+        # self.plot_history(history)
     
     def plot_history(self, history):
         acc = history.history['accuracy']

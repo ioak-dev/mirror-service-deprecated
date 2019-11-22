@@ -9,7 +9,7 @@ from deeplearning.models import Model, ModelContainer
 DATABASE_URI = os.environ.get('DATABASE_URI')
 
 def add_category(tenant, data):
-    id = get_collection(tenant, 'category').insert(data)
+    id = get_collection(tenant, 'category').insert_many(data)
     return (200, {'_id': str(id)})
 
 def get_category_all(tenant):
