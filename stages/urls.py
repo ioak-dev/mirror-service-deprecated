@@ -4,5 +4,5 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns =[
-    path('stages', views.add_stages)
+    path('', views.add_stages)
 ]
