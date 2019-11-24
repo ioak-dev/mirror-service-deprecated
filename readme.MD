@@ -10,3 +10,8 @@
 ## Every time
 * workon <environment name> (eg: workon local)
 * python manage.py runserver
+
+## Procfile Honcho for celery
+web: gunicorn mirror.wsgi --log-file
+worker1: celery -A mirror beat -l info
+worker2: celery -A mirror worker -l info
