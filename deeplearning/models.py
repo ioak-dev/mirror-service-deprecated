@@ -15,25 +15,20 @@ class Model:
         self.network_name = network_name
         plt.style.use('ggplot')
 
-    def train(self, df, label_list):
-        self.print_dataset_proportion([df])
-        label_dict = collection_utils.list_to_dict(label_list, 'name', 'value')
-        df['label'] = df['label'].map(label_dict)
-        df['text'] = df['text'].apply(nlp_utils.clean_text)
-        train_df, remain_df = train_test_split(df, train_size=0.7, stratify=df['label'])
-        val_df, test_df = train_test_split(remain_df, train_size=0.1, stratify=remain_df['label'])
-        self.print_dataset_proportion([df, train_df, val_df, test_df])
-        
-        self.initialize_vectorizer(train_df['text'].values)
-        X_train = self.vectorize(train_df)
-        X_val = self.vectorize(val_df)
-        X_test = self.vectorize(test_df)
-        y_train = train_df['label'].values
-        y_val = val_df['label'].values
-        y_test = test_df['label'].values
+    def tensor_to_tuple(self, line):
+        features = tf.io.parse_single_example(
+        line,
+        features={
+            'features': tf.io.FixedLenFeature([100], tf.float32),
+            'label': tf.io.FixedLenFeature([1], tf.int64)
+        })
+        return features['features'], features['label']
 
-        # self.logistic_regression((X_train, X_val, X_test), (y_train, y_val, y_test))
-        self.neural_network((X_train, X_val, X_test), (y_train, y_val, y_test), df['label'].nunique())
+    def train(self, tenant):
+        train_dataset = tf.data.TFRecordDataset(filenames = ['data/' + tenant + '_' + 'train' + '.tfrecords']).map(self.tensor_to_tuple).shuffle(1000).batch(10)
+        val_dataset = tf.data.TFRecordDataset(filenames = ['data/' + tenant + '_' + 'val' + '.tfrecords']).map(self.tensor_to_tuple).shuffle(1000).batch(10)
+        test_dataset = tf.data.TFRecordDataset(filenames = ['data/' + tenant + '_' + 'test' + '.tfrecords']).map(self.tensor_to_tuple).shuffle(1000).batch(10)
+        self.neural_network(train_dataset, val_dataset, test_dataset)
 
     def predict(self, sentence):
         feature_vector = self.vectorize_sentence([sentence])
@@ -42,9 +37,11 @@ class Model:
         print(prediction)
         return prediction
 
-    def initialize_vectorizer(self, sentences):
+    def initialize_vectorizer(self):
         self.vectorizer = CountVectorizer(min_df=0, lowercase=False, max_features=100)
-        self.vectorizer.fit(sentences)
+        f = open('deeplearning/vocab.txt', 'r', encoding='utf-8')
+        self.vectorizer.fit(f.readlines())
+        # self.vectorizer.fit(df['text'].values)
     
     def vectorize(self, df):
         sentences = df['text'].values
@@ -63,25 +60,11 @@ class Model:
         score = classifier.score(X[2], y[2])
         print('Accuracy = ', score)
 
-    def neural_network(self, X, y, label_count):
-        y_train = y[0].astype('float32')
-        y_val = y[1].astype('float32')
-        y_test = y[2].astype('float32')
-        X_train = X[0].astype('float32')
-        X_val = X[1].astype('float32')
-        X_test = X[2].astype('float32')
-        print(X_train.shape, y_train.shape, type(X_train), type(y_train))
-
-        train_dataset = tf.data.Dataset.from_tensor_slices((X_train, y_train))
-        train_dataset = train_dataset.shuffle(buffer_size=1024).batch(64)
-        val_dataset = tf.data.Dataset.from_tensor_slices((X_val, y_val))
-        val_dataset = val_dataset.batch(64)
-        test_dataset = tf.data.Dataset.from_tensor_slices((X_test, y_test))
-        test_dataset = test_dataset.batch(64)
-
+    def neural_network(self, train_dataset, val_dataset, test_dataset):
         inputs = keras.Input(shape=(100,), name='digits')
-        x = keras.layers.Dense(6, activation='relu', name='dense_1')(inputs)
-        outputs = keras.layers.Dense(label_count, activation='softmax', name='predictions')(x)
+        x = keras.layers.Dense(64, activation='relu', name='dense_1')(inputs)
+        x = keras.layers.Dense(64, activation='relu', name='dense_2')(x)
+        outputs = keras.layers.Dense(self.label_count, activation='softmax', name='predictions')(x)
         self.model = keras.Model(inputs=inputs, outputs=outputs)
         self.model.compile(optimizer=keras.optimizers.RMSprop(learning_rate=1e-3),
               loss='sparse_categorical_crossentropy',
