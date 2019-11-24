@@ -1,1 +1,1 @@
-web: gunicorn mirror.wsgi --log-file --timeout 300
+web: gunicorn mirror.wsgi --log-file
