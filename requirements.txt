@@ -36,7 +36,7 @@ Markdown==3.1.1
 matplotlib==3.1.1
 mccabe==0.6.1
 nltk==3.4.5
-numpy==1.17.4
+numpy==1.16.5
 oauthlib==3.1.0
 opt-einsum==3.1.0
 pandas==0.25.3
@@ -60,11 +60,13 @@ sklearn==0.0
 soupsieve==1.9.5
 sqlparse==0.3.0
 statsmodels==0.10.1
+tb-nightly==1.14.0a20190301
 tensorboard==2.0.1
 tensorflow==2.0.0a0
 tensorflow-estimator==2.0.1
 tensorflow-hub==0.7.0
 termcolor==1.1.0
+tf-estimator-nightly==1.14.0.dev2019030115
 typed-ast==1.4.0
 urllib3==1.25.7
 Werkzeug==0.16.0

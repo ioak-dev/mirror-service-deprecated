@@ -33,6 +33,11 @@ def train_model(request, tenant, network_name):
     return JsonResponse(response[1], status=response[0])
 
 @api_view(['POST'])
+def featuretext_to_vector(request, tenant, network_name):
+    response = service.featuretext_to_vector(tenant, network_name)
+    return JsonResponse(response[1], status=response[0])
+
+@api_view(['POST'])
 def predict(request, tenant, network_name):
     response = service.predict(tenant, network_name, request.body.decode('utf-8'))
     return JsonResponse(response[1], status=response[0])
