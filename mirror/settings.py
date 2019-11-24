@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'corsheaders'
+    'corsheaders',
+    'deeplearning'
 ]
 
 MIDDLEWARE = [
@@ -56,6 +57,15 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# For RabbitMQ
+BROKER_URL = 'amqp://szjeavva:x4YskfNjMXc4B6rSQE-6FyIsCwy0zYh_@cougar.rmq.cloudamqp.com/szjeavva'
+CELERY_RESULT_BACKEND = 'amqp://localhost'
+# Celery Data Format
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Kolkata'
 
 CORS_ORIGIN_ALLOW_ALL = True
 
