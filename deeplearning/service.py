@@ -9,6 +9,7 @@ import library.nlp_utils as nlp_utils
 from sklearn.model_selection import train_test_split
 from library.collection_utils import list_to_dict
 import tensorflow as tf
+from deeplearning.tasks import test_task
 
 DATABASE_URI = os.environ.get('DATABASE_URI')
 
@@ -64,6 +65,11 @@ def create_model(tenant, network_name):
 
 def remove_model(tenant, network_name):
     ModelContainer.remove(tenant, network_name)
+    return (200, {})
+    
+def featuretext_to_vector_async(tenant, network_name):
+    print('featuretext_to_vector_async', tenant, network_name)
+    test_task.delay(tenant, network_name)
     return (200, {})
     
 def featuretext_to_vector(tenant, network_name):

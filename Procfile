@@ -1,1 +1,1 @@
-web: gunicorn mirror.wsgi --log-file
+web: honcho start -f ProcfileHoncho
