@@ -70,7 +70,9 @@ def featuretext_to_vector(tenant, network_name):
     create_model(tenant, network_name)
     model = ModelContainer.get(tenant, network_name)
     # model.initialize_vectorizer(pd.DataFrame(list(get_collection(tenant, 'dataset_train').find({}))))
+    print('initializing vectorizer')
     model.initialize_vectorizer()
+    print('initialized vectorizer')
     categories = get_collection(tenant, 'category').find({})
     label_map = list_to_dict(list(categories), 'name', 'value')
     write_to_tfrecord(tenant, 'val', label_map, model.vectorizer)
@@ -90,6 +92,7 @@ def featuretext_to_vector(tenant, network_name):
     return (200, {})
 
 def write_to_tfrecord(tenant, datatype, label_map, vectorizer):
+    print('vectorizing', datatype)
     label_count = set()
     cursor = get_collection(tenant, 'dataset_' + datatype).find({})
     with tf.io.TFRecordWriter('data/' + tenant + '_' + datatype + '.tfrecords') as writer:
