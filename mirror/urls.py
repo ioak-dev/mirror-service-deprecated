@@ -20,7 +20,8 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
-    path('celery/result/<str:task_id>', views.get_result),
+    path('task/<str:task_id>/status', views.get_status),
+    path('task/<str:task_id>/result', views.get_result),
     path('admin/<str:tenant>/', admin.site.urls),
     path('auth/<str:tenant>/', include('auth.urls')),
     path('tenant/', include('tenant.urls')),

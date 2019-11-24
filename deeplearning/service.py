@@ -4,7 +4,7 @@ from library.db_connection_factory import get_collection
 import pandas as pd
 from io import StringIO
 import os, json, time
-from deeplearning.models import Model, ModelContainer
+from deeplearning.models import TransientModel, ModelContainer
 import library.nlp_utils as nlp_utils
 from sklearn.model_selection import train_test_split
 from library.collection_utils import list_to_dict
@@ -35,17 +35,15 @@ def add_dataset(tenant, csv_data):
                 }
             )
 
-def get_dataset(tenant, csv_data):
-    dataset = get_collection(tenant, 'dataset_test').find({})
-    df = pd.DataFrame(list(dataset))
-    if df.size == 0:
-        return (204, {})
-    else:
-        df.pop('_id')
-        return (200, {
-            'dimension': df.shape,
-            'data': json.loads(df.to_json(orient='records'))
-            })
+def get_dataset(tenant):
+    train_count = get_collection(tenant, 'dataset_train').find({}).count()
+    val_count = get_collection(tenant, 'dataset_val').find({}).count()
+    test_count = get_collection(tenant, 'dataset_test').find({}).count()
+    return (200, {
+        'train': train_count,
+        'val': val_count,
+        'test': test_count
+        })
 
 
 def clear_dataset(tenant, csv_data):
@@ -60,46 +58,41 @@ def clear_dataset(tenant, csv_data):
                 }
             )
 
-def create_model(tenant, network_name):
-    model = Model(network_name)
-    ModelContainer.add(tenant, network_name, model)
-    return (200, {})
-
-def remove_model(tenant, network_name):
-    ModelContainer.remove(tenant, network_name)
+def remove_model(tenant):
+    ModelContainer.remove(tenant)
     return (200, {})
     
-def featuretext_to_vector(tenant, network_name):
+def train_model(tenant):
     if CELERY_BROKER_URL is None:
-        tasks.vectorize(tenant, network_name)
+        tasks.train_model(tenant)
         return (200, {})
     else:
-        task_result = tasks.vectorize.delay(tenant, network_name)
-        return (200, {'async_task_id': task_result.id})
-        # res = AsyncResult(task_result.id)
-        # response = res.collect()
-        # for a, v in response:
-        #     print(a)
-        #     print(v)
-
-def train_model(tenant, network_name):
-    if CELERY_BROKER_URL is None:
-        tasks.train_model(tenant, network_name)
-        return (200, {})
-    else:
-        task_result = tasks.train_model.delay(tenant, network_name)
+        task_result = tasks.train_model.delay(tenant)
         return (200, {'async_task_id': task_result.id})
 
-def predict(tenant, network_name, sentence):
-    model = ModelContainer.get(tenant, network_name)
+# def train_model(tenant):
+#     if CELERY_BROKER_URL is None:
+#         tasks.train_model(tenant)
+#         return (200, {})
+#     else:
+#         task_result = tasks.train_model.delay(tenant)
+#         return (200, {'async_task_id': task_result.id})
+
+def load_model(tenant):
+    model = TransientModel.load_model(tenant)
+    vectorizer = TransientModel.load_vectorizer(tenant)
+    ModelContainer.add(tenant, model, vectorizer)
+    return (200, {})
+
+def predict(tenant, sentence):
+    model, vectorizer = ModelContainer.get(tenant)
     sentence = nlp_utils.clean_text(sentence)
-    prediction = model.predict(sentence)
+    feature_vector = vectorizer.transform([sentence]).toarray()
+    prediction = model.predict(feature_vector)
     print(prediction)
     ranks = prediction[0].argsort().argsort()
     categories = get_collection(tenant, 'category').find({})
     label_map = list_to_dict(list(categories), 'value', 'name')
-    print(type(prediction[0]))
-    print(type(prediction[0][0]))
     outcome = []
     for i in range(len(prediction[0])):
         outcome.append({

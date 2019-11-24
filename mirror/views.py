@@ -9,3 +9,8 @@ def get_result(request, task_id):
     response = res.collect()
     for a, v in response:
         return JsonResponse(v, status=200)
+
+@api_view(['GET'])
+def get_status(request, task_id):
+    res = AsyncResult(task_id)
+    return HttpResponse(res.state, status=200)
