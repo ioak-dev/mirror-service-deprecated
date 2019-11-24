@@ -4,7 +4,8 @@ from library.db_connection_factory import get_collection
 import pandas as pd
 from io import StringIO
 import os, json
-from deeplearning.models import Model, ModelContainer
+from deeplearning.models import ModelContainer
+import deeplearning.models.TransientModel as Model
 import library.nlp_utils as nlp_utils
 from sklearn.model_selection import train_test_split
 from library.collection_utils import list_to_dict

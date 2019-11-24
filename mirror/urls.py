@@ -17,7 +17,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls import url
 
+from . import views
+
 urlpatterns = [
+    path('task/<str:task_id>/status', views.get_status),
+    path('task/<str:task_id>/result', views.get_result),
     path('admin/<str:tenant>/', admin.site.urls),
     path('auth/<str:tenant>/', include('auth.urls')),
     path('tenant/', include('tenant.urls')),

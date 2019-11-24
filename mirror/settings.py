@@ -60,7 +60,7 @@ MIDDLEWARE = [
 
 # For RabbitMQ
 BROKER_URL = 'amqp://szjeavva:x4YskfNjMXc4B6rSQE-6FyIsCwy0zYh_@cougar.rmq.cloudamqp.com/szjeavva'
-CELERY_RESULT_BACKEND = 'amqp://localhost'
+CELERY_RESULT_BACKEND = 'amqp://szjeavva:x4YskfNjMXc4B6rSQE-6FyIsCwy0zYh_@cougar.rmq.cloudamqp.com/szjeavva'
 # Celery Data Format
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'

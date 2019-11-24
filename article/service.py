@@ -4,7 +4,6 @@ from library.db_connection_factory import get_collection
 import pandas as pd
 from io import StringIO
 import os, json
-from deeplearning.models import Model, ModelContainer
 
 DATABASE_URI = os.environ.get('DATABASE_URI')
 

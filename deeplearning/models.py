@@ -10,10 +10,18 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-class Model:
-    def __init__(self, network_name):
-        self.network_name = network_name
+class TransientModel:
+    def __init__(self, tenant):
         plt.style.use('ggplot')
+
+    def load_model(tenant):
+        return keras.models.load_model('data/model/' + tenant)
+
+    def load_vectorizer(tenant):
+        vectorizer = CountVectorizer(min_df=0, lowercase=False, max_features=100)
+        f = open('deeplearning/vocab.txt', 'r', encoding='utf-8')
+        vectorizer.fit(f.readlines())
+        return vectorizer
 
     def tensor_to_tuple(self, line):
         features = tf.io.parse_single_example(
@@ -25,10 +33,11 @@ class Model:
         return features['features'], features['label']
 
     def train(self, tenant):
-        train_dataset = tf.data.TFRecordDataset(filenames = ['data/' + tenant + '_' + 'train' + '.tfrecords']).map(self.tensor_to_tuple).shuffle(1000).batch(10)
-        val_dataset = tf.data.TFRecordDataset(filenames = ['data/' + tenant + '_' + 'val' + '.tfrecords']).map(self.tensor_to_tuple).shuffle(1000).batch(10)
-        test_dataset = tf.data.TFRecordDataset(filenames = ['data/' + tenant + '_' + 'test' + '.tfrecords']).map(self.tensor_to_tuple).shuffle(1000).batch(10)
+        train_dataset = tf.data.TFRecordDataset(filenames = ['data/tfrecords/' + tenant + '_' + 'train' + '.tfrecords']).map(self.tensor_to_tuple).shuffle(1000).batch(100)
+        val_dataset = tf.data.TFRecordDataset(filenames = ['data/tfrecords/' + tenant + '_' + 'val' + '.tfrecords']).map(self.tensor_to_tuple).shuffle(1000).batch(100)
+        test_dataset = tf.data.TFRecordDataset(filenames = ['data/tfrecords/' + tenant + '_' + 'test' + '.tfrecords']).map(self.tensor_to_tuple).shuffle(1000).batch(100)
         self.neural_network(train_dataset, val_dataset, test_dataset)
+        self.model.save('data/model/' + tenant)
 
     def predict(self, sentence):
         feature_vector = self.vectorize_sentence([sentence])
@@ -104,18 +113,17 @@ class ModelContainer:
     instances = {}
     
     @staticmethod
-    def add(tenant, network_name, model):
-        ModelContainer.instances[tenant] = {network_name: model}
+    def add(tenant, model, vectorizer):
+        ModelContainer.instances[tenant] = {'model': model, 'vectorizer': vectorizer}
 
     @staticmethod
-    def get(tenant, network_name):
-        if tenant in ModelContainer.instances and network_name in ModelContainer.instances[tenant]:
-            print('PRESENT****')
-            return ModelContainer.instances[tenant][network_name]
+    def get(tenant):
+        if tenant in ModelContainer.instances:
+            return ModelContainer.instances[tenant].get('model'), ModelContainer.instances[tenant].get('vectorizer')
         else:
-            print('ABSENT****')
+            return
 
     @staticmethod
-    def remove(tenant, network_name):
-        if tenant in ModelContainer.instances and network_name in ModelContainer.instances[tenant]:
-            del ModelContainer.instances[tenant][network_name]
+    def remove(tenant):
+        if tenant in ModelContainer.instances:
+            del ModelContainer.instances[tenant]

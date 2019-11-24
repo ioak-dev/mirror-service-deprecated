@@ -11,8 +11,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 class Model:
-    def __init__(self, network_name):
-        self.network_name = network_name
+    def __init__(self):
         plt.style.use('ggplot')
 
     def train(self, df, label_list):
@@ -121,18 +120,17 @@ class ModelContainer:
     instances = {}
     
     @staticmethod
-    def add(tenant, network_name, model):
-        ModelContainer.instances[tenant] = {network_name: model}
+    def add(tenant, model):
+        ModelContainer.instances[tenant] = model
 
     @staticmethod
-    def get(tenant, network_name):
-        if tenant in ModelContainer.instances and network_name in ModelContainer.instances[tenant]:
-            print('PRESENT****')
-            return ModelContainer.instances[tenant][network_name]
+    def get(tenant):
+        if tenant in ModelContainer.instances:
+            return ModelContainer.instances[tenant]
         else:
-            print('ABSENT****')
+            return
 
     @staticmethod
-    def remove(tenant, network_name):
-        if tenant in ModelContainer.instances and network_name in ModelContainer.instances[tenant]:
-            del ModelContainer.instances[tenant][network_name]
+    def remove(tenant):
+        if tenant in ModelContainer.instances:
+            del ModelContainer.instances[tenant]
