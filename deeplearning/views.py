@@ -34,7 +34,7 @@ def train_model(request, tenant, network_name):
 
 @api_view(['POST'])
 def featuretext_to_vector(request, tenant, network_name):
-    response = service.featuretext_to_vector_async(tenant, network_name)
+    response = service.featuretext_to_vector(tenant, network_name)
     return JsonResponse(response[1], status=response[0])
 
 @api_view(['POST'])

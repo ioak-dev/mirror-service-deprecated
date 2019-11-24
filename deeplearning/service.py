@@ -3,15 +3,17 @@ from pymongo import MongoClient
 from library.db_connection_factory import get_collection
 import pandas as pd
 from io import StringIO
-import os, json
+import os, json, time
 from deeplearning.models import Model, ModelContainer
 import library.nlp_utils as nlp_utils
 from sklearn.model_selection import train_test_split
 from library.collection_utils import list_to_dict
 import tensorflow as tf
-from deeplearning.tasks import test_task
+import deeplearning.tasks as tasks
+from celery.result import AsyncResult
 
 DATABASE_URI = os.environ.get('DATABASE_URI')
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
 
 def add_dataset(tenant, csv_data):
     df = pd.read_csv(StringIO(csv_data))
@@ -67,80 +69,26 @@ def remove_model(tenant, network_name):
     ModelContainer.remove(tenant, network_name)
     return (200, {})
     
-def featuretext_to_vector_async(tenant, network_name):
-    print('featuretext_to_vector_async', tenant, network_name)
-    test_task.delay(tenant, network_name)
-    return (200, {})
-    
 def featuretext_to_vector(tenant, network_name):
-    create_model(tenant, network_name)
-    model = ModelContainer.get(tenant, network_name)
-    # model.initialize_vectorizer(pd.DataFrame(list(get_collection(tenant, 'dataset_train').find({}))))
-    print('initializing vectorizer')
-    model.initialize_vectorizer()
-    print('initialized vectorizer')
-    categories = get_collection(tenant, 'category').find({})
-    label_map = list_to_dict(list(categories), 'name', 'value')
-    write_to_tfrecord(tenant, 'val', label_map, model.vectorizer)
-    label_count = write_to_tfrecord(tenant, 'train', label_map, model.vectorizer)
-    write_to_tfrecord(tenant, 'test', label_map, model.vectorizer)
-
-    model.label_count = label_count
-    
-    # dataset = tf.data.TFRecordDataset(filenames = ['data/' + tenant + '_' + 'val' + '.tfrecords'])
-    # # dataset.batch(1)
-    # i = 0
-    # for item in dataset.take(5):
-    #     parsed = tf.train.Example.FromString(item.numpy())
-    #     i = i+1
-    #     # print(parsed)
-    #     # print(i)
-    return (200, {})
-
-def write_to_tfrecord(tenant, datatype, label_map, vectorizer):
-    print('vectorizing', datatype)
-    label_count = set()
-    cursor = get_collection(tenant, 'dataset_' + datatype).find({})
-    with tf.io.TFRecordWriter('data/' + tenant + '_' + datatype + '.tfrecords') as writer:
-        i = 0
-        for item in cursor:
-            i = i + 1
-            features = vectorizer.transform([item['text']]).toarray()[0]
-            label = label_map.get(item['label'])
-            # print(vector[0].shape)
-            # print(label)
-            label_count.add(label)
-            example = tf.train.Example()
-            example.features.feature["features"].float_list.value.extend(features)
-            example.features.feature["label"].int64_list.value.append(label)
-            writer.write(example.SerializeToString())
-    print('label_count', datatype, len(label_count))
-    print('record_count', datatype, i)
-    return len(label_count)
-
-def train_model_using_df(tenant, network_name):
-    model = ModelContainer.get(tenant, network_name)
-    if model == None:
-        return (204, {'error': 'model not present uner network name [' + network_name + ']'})
+    if CELERY_BROKER_URL is None:
+        tasks.vectorize(tenant, network_name)
+        return (200, {})
     else:
-        dataset = get_collection(tenant, 'dataset').find({})
-        df = pd.DataFrame(list(dataset))
-        if df.size == 0:
-            return (204, {'error': 'train / test dataset is not present'})
-        else:
-            df.pop('_id')
-            categories = get_collection(tenant, 'category').find({})
-            model.train(df, list(categories))
-            return (200, {'dimension': df.shape})
-
+        task_result = tasks.vectorize.delay(tenant, network_name)
+        return (200, {'async_task_id': task_result.id})
+        # res = AsyncResult(task_result.id)
+        # response = res.collect()
+        # for a, v in response:
+        #     print(a)
+        #     print(v)
 
 def train_model(tenant, network_name):
-    model = ModelContainer.get(tenant, network_name)
-    if model == None:
-        return (204, {'error': 'model not present uner network name [' + network_name + ']'})
-    else:
-        model.train(tenant)
+    if CELERY_BROKER_URL is None:
+        tasks.train_model(tenant, network_name)
         return (200, {})
+    else:
+        task_result = tasks.train_model.delay(tenant, network_name)
+        return (200, {'async_task_id': task_result.id})
 
 def predict(tenant, network_name, sentence):
     model = ModelContainer.get(tenant, network_name)

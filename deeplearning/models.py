@@ -25,9 +25,9 @@ class Model:
         return features['features'], features['label']
 
     def train(self, tenant):
-        train_dataset = tf.data.TFRecordDataset(filenames = ['data/' + tenant + '_' + 'train' + '.tfrecords']).map(self.tensor_to_tuple).shuffle(1000).batch(10)
-        val_dataset = tf.data.TFRecordDataset(filenames = ['data/' + tenant + '_' + 'val' + '.tfrecords']).map(self.tensor_to_tuple).shuffle(1000).batch(10)
-        test_dataset = tf.data.TFRecordDataset(filenames = ['data/' + tenant + '_' + 'test' + '.tfrecords']).map(self.tensor_to_tuple).shuffle(1000).batch(10)
+        train_dataset = tf.data.TFRecordDataset(filenames = ['data/' + tenant + '_' + 'train' + '.tfrecords']).map(self.tensor_to_tuple).shuffle(1000).batch(100)
+        val_dataset = tf.data.TFRecordDataset(filenames = ['data/' + tenant + '_' + 'val' + '.tfrecords']).map(self.tensor_to_tuple).shuffle(1000).batch(100)
+        test_dataset = tf.data.TFRecordDataset(filenames = ['data/' + tenant + '_' + 'test' + '.tfrecords']).map(self.tensor_to_tuple).shuffle(1000).batch(100)
         self.neural_network(train_dataset, val_dataset, test_dataset)
 
     def predict(self, sentence):
