@@ -8,13 +8,15 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 
 def do_add_stage(tenant, stage):
-    for i in stage:
-        stage_data = get_collection(tenant,'stage').find_one({'name': i['name']})
-        if stage_data == None:
+    all_stages = get_collection(tenant,'stage').find({}, {'_id': False})
+    id = 0
+    for j in all_stages :
+        for i in stage :
+            if j['name'] not in i :
+                id = get_collection(tenant, 'stage').remove({'name' : j["name"]})
+    for i in stage :
+        tempStage = get_collection(tenant,'stage').find_one({'name': i['name']})
+        if tempStage is None :
             id = get_collection(tenant, 'stage').insert_one(i)
-            return (200, {'_id': str(id)})
-    return (200, {'_id': None})
-
-def do_remove_stage(tenant, stage):
-    id = get_collection(tenant, 'stage').delete_one({'name' : stage["name"]})
+            
     return (200, {'_id': str(id)})
