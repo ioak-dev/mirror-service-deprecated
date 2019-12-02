@@ -18,18 +18,11 @@ CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
 def add_dataset(tenant, csv_data):
     df = pd.read_csv(StringIO(csv_data))
     df = df.dropna()
-    print('before')
-    train_df, remain_df = train_test_split(df, train_size=0.7, stratify=df['label'])
-    print('after one')
-    print(remain_df.groupby('label').count())
-    val_df, test_df = train_test_split(remain_df, train_size=0.1, stratify=remain_df['label'])
-    print('after two')
+    train_df, test_df = train_test_split(df, train_size=0.8, stratify=df['label'])
     get_collection(tenant, 'dataset_train').insert(train_df.to_dict('records'))
-    get_collection(tenant, 'dataset_val').insert(val_df.to_dict('records'))
     get_collection(tenant, 'dataset_test').insert(test_df.to_dict('records'))
     return (200, {'dimension': {
                     'train': train_df.shape,
-                    'val': val_df.shape,
                     'test': test_df.shape
                     }
                 }
@@ -48,11 +41,9 @@ def get_dataset(tenant):
 
 def clear_dataset(tenant, csv_data):
     train_response = get_collection(tenant, 'dataset_train').remove({})
-    val_response = get_collection(tenant, 'dataset_val').remove({})
     test_response = get_collection(tenant, 'dataset_test').remove({})
     return (200, {'count': {
                         'train': train_response,
-                        'val': val_response,
                         'test': test_response
                     }
                 }
