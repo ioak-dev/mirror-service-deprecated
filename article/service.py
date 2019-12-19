@@ -8,8 +8,14 @@ import os, json
 DATABASE_URI = os.environ.get('DATABASE_URI')
 
 def add_category(tenant, data):
-    categoryId = get_collection(tenant, 'category').find().sort({'name':-1})
-    #print(list(categoryId))
+    category_id = get_collection(tenant, 'category').find({})
+    l_category = 0
+    for cid in category_id:
+        local_Category = cid['categoryId']
+        l_category = int(local_Category)+1
+    for value in data:
+        value['categoryId'] = l_category
+        l_category = l_category+1
     id = get_collection(tenant, 'category').insert_many(data)
     return (200, {'_id': str(id)})
 
