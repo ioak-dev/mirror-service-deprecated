@@ -4,5 +4,6 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns =[
-    path('', views.get_update_faq)
+    path('', views.get_update_faq),
+    path('<str:id>', views.delete_faq)
 ]
