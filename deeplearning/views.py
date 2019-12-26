@@ -37,6 +37,12 @@ def load_model(request, tenant):
     response = service.load_model(tenant)
     return JsonResponse(response[1], status=response[0])
 
+
+@api_view(['GET'])
+def load_labels(request, tenant):
+    response = service.load_labels(tenant)
+    return JsonResponse(response[1], status=response[0])
+
 # @api_view(['POST'])
 # def featuretext_to_vector(request, tenant):
 #     response = service.featuretext_to_vector(tenant)

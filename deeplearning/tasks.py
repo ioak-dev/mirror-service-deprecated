@@ -17,7 +17,11 @@ def train_model(self, tenant):
     print('initializing vectorizer')
     model.initialize_vectorizer()
     print('initialized vectorizer')
-    categories = get_collection(tenant, 'category').find({})
-    label_map = list_to_dict(list(categories), 'name', 'value')
+    label_map = {}
+    index = 0
+    for label_item in get_collection(tenant, 'dataset_train').find({}).distinct('label'):
+        label_map[label_item] = index
+        index = index + 1
+
     model.train(tenant, label_map, pd.DataFrame(list(get_collection(tenant, 'dataset_train').find({}))), pd.DataFrame(list(get_collection(tenant, 'dataset_test').find({}))))
     return {'label_count': 'label_count'}

@@ -8,5 +8,6 @@ urlpatterns =[
     path('model', views.model),
     path('model/train', views.train_model),
     path('model/load', views.load_model),
+    path('labels/load', views.load_labels),
     path('model/predict', views.predict)
 ]
