@@ -8,10 +8,14 @@ DATABASE_URI = os.environ.get('DATABASE_URI')
 def do_get_faq(tenant):
     existing_faq_list = get_collection(tenant, 'Faq').find()
     existing_faq = []
+    existing_categories = ([])
     for existing_faqs in existing_faq_list:
         existing_faqs['_id'] = str(existing_faqs['_id'])
         existing_faq.append(existing_faqs)
-    return (200, {'faq': existing_faq})
+        if existing_faqs['category'] not in existing_categories:
+            existing_categories.append(existing_faqs['category'])
+    print(existing_categories)
+    return (200, {'faq': existing_faq ,'category': existing_categories})
 
 def do_add_update_faq(tenant, data):
     updated_id = 'id'

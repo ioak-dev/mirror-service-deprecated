@@ -5,7 +5,6 @@ import faq.service as service
 
 @api_view(['GET', 'PUT'])
 def get_update_faq(request, tenant):
-    print(request.method)
     if request.method == 'GET':
         response = service.do_get_faq(tenant)
         return JsonResponse(response[1], status=response[0])
@@ -17,6 +16,5 @@ def get_update_faq(request, tenant):
 @api_view(['DELETE'])
 def delete_faq(request,tenant,id):
     if request.method == 'DELETE':
-        print(request.body)
         response = service.do_delete_faq(tenant, id)
         return JsonResponse(response[1], status=response[0])
