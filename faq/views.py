@@ -18,3 +18,11 @@ def delete_faq(request,tenant,id):
     if request.method == 'DELETE':
         response = service.do_delete_faq(tenant, id)
         return JsonResponse(response[1], status=response[0])
+
+
+
+@api_view(['GET'])
+def get_by_category(request, tenant, category):
+    if request.method == 'GET':
+        response = service.do_get_faq_by_category(tenant, category)
+        return JsonResponse(response[1], status=response[0])

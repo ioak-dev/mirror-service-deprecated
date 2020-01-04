@@ -37,3 +37,11 @@ def do_add_update_faq(tenant, data):
 def do_delete_faq(tenant, id):
     result = get_collection(tenant,'Faq').delete_one({'_id': ObjectId(id)})
     return (200, {'deleted_count':result.deleted_count})
+
+def do_get_faq_by_category(tenant, category):
+    result = get_collection(tenant,'Faq').find({'category': category})
+    response = []
+    for item in result:
+        item['_id'] = str(item['_id'])
+        response.append(item)
+    return (200, {'data': response})
