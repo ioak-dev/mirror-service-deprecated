@@ -14,7 +14,6 @@ def do_get_faq(tenant):
         existing_faq.append(existing_faqs)
         if existing_faqs['category'] not in existing_categories:
             existing_categories.append(existing_faqs['category'])
-    print(existing_categories)
     return (200, {'faq': existing_faq ,'category': existing_categories})
 
 def do_add_update_faq(tenant, data):

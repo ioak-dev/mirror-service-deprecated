@@ -27,5 +27,6 @@ urlpatterns = [
     path('tenant/', include('tenant.urls')),
     path('deeplearning/<str:tenant>/', include('deeplearning.urls')),
     path('stage/<str:tenant>/', include('stage.urls')),
-    path('faq/<str:tenant>/', include('faq.urls'))
+    path('faq/<str:tenant>/', include('faq.urls')),
+    path('servicerequests/<str:tenant>/', include('servicerequests.urls'))
 ]
