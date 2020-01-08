@@ -15,8 +15,11 @@ def do_get_sr(tenant):
     return (200, {'data': existing_sr})
 
 def do_add_update_sr(tenant, data):
+    stage_list = list(get_collection(tenant, 'stage').find({}))
     data['createDate'] = datetime.datetime.now().isoformat()
     data['updateDate'] = datetime.datetime.now().isoformat()
-    data['status'] = 'open'
+    data['status'] = 'assigned'
+    data['stage'] = stage_list[0]['name']
+    data['assignedTo'] = ''
     request = get_collection(tenant, 'serviceRequests').insert_one(data)
     return (200, {'_id': str(request.inserted_id)})
