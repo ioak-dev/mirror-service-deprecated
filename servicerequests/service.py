@@ -1,4 +1,4 @@
-import os, datetime, time
+import os, datetime, time, random
 from pymongo import mongo_client
 from library.db_connection_factory import get_collection
 
@@ -15,13 +15,7 @@ def do_get_sr(tenant):
     return (200, {'data': existing_sr})
 
 def do_add_update_sr(tenant, data):
-    existing_req_no = list(get_collection(tenant, 'serviceRequests').find({'requestNo':{"$exists": True}} ,sort = [('requestNo',-1)]).limit(1))
-    if not existing_req_no:
-        requestNo = 'ioak1'
-    else :
-        temp_request_number = int(existing_req_no[0]['requestNo'][4:])+1
-        requestNo = 'ioak'+str(temp_request_number)
-    data['requestNo'] = requestNo
+    data['requestNo'] = random.randint(100000000000,999999999999)
     data['createDate'] = datetime.datetime.now().isoformat()
     data['updateDate'] = datetime.datetime.now().isoformat()
     data['status'] = 'open'
