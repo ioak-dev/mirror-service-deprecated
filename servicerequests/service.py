@@ -18,5 +18,5 @@ def do_add_update_sr(tenant, data):
     data['createDate'] = datetime.datetime.now().isoformat()
     data['updateDate'] = datetime.datetime.now().isoformat()
     data['status'] = 'open'
-    id = get_collection(tenant, 'serviceRequests').insert_one(data)
-    return (200, {'_id': str(id)})
+    request = get_collection(tenant, 'serviceRequests').insert_one(data)
+    return (200, {'_id': str(request.inserted_id)})
