@@ -15,7 +15,6 @@ def do_get_sr(tenant):
     return (200, {'data': existing_sr})
 
 def do_add_update_sr(tenant, data):
-    data['requestNo'] = random.randint(100000000000,999999999999)
     data['createDate'] = datetime.datetime.now().isoformat()
     data['updateDate'] = datetime.datetime.now().isoformat()
     data['status'] = 'open'
