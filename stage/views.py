@@ -9,7 +9,7 @@ import json, base64
 def get_update_stages(request,tenant):
     if request.method == 'GET':
         response = service.do_get_stages(tenant)
-        return JsonResponse(response[1], status=response[0], safe=False)
+        return JsonResponse(response[1], status=response[0])
     if request.method == 'PUT':
         response = service.do_update_stages(tenant, request.body)
         return JsonResponse(response[1], status=response[0])

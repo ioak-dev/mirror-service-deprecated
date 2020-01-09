@@ -7,14 +7,14 @@ import os, json, time
 from deeplearning.models import TransientModel, ModelContainer
 import library.nlp_utils as nlp_utils
 from sklearn.model_selection import train_test_split
-from library.collection_utils import list_to_dict
+import library.collection_utils as collection_utils
 import tensorflow as tf
 import deeplearning.tasks as tasks
 from celery.result import AsyncResult
 
 DATABASE_URI = os.environ.get('DATABASE_URI')
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
-
+CELERY_BROKER_URL = None
 def add_dataset(tenant, csv_data):
     df = pd.read_csv(StringIO(csv_data))
     df = df.dropna()
@@ -75,6 +75,10 @@ def load_model(tenant):
     ModelContainer.add(tenant, model, vectorizer)
     return (200, {})
 
+def load_labels(tenant):
+    label_map = TransientModel.load_labels(tenant)
+    return (200, label_map)
+
 def predict(tenant, sentence):
     model, vectorizer = ModelContainer.get(tenant)
     sentence = nlp_utils.clean_text(sentence)
@@ -82,8 +86,7 @@ def predict(tenant, sentence):
     prediction = model.predict(feature_vector)
     print(prediction)
     ranks = prediction[0].argsort().argsort()
-    categories = get_collection(tenant, 'category').find({})
-    label_map = list_to_dict(list(categories), 'value', 'name')
+    label_map = collection_utils.dict_invert(TransientModel.load_labels(tenant))
     outcome = []
     for i in range(len(prediction[0])):
         outcome.append({

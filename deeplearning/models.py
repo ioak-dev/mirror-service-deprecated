@@ -8,6 +8,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
 import matplotlib.pyplot as plt
 import pandas as pd
+import json
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from tensorflow.keras.optimizers import RMSprop
@@ -15,9 +16,9 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing import sequence
 
 
-max_words = 1000
+max_words = 10000
 # time series i believe. set max_len to 1 for non-RNN
-max_len = 1
+max_len = 150
 
 class TransientModel:
     def __init__(self, tenant):
@@ -26,8 +27,12 @@ class TransientModel:
     def load_model(tenant):
         return keras.models.load_model('data/model/' + tenant)
 
+    def load_labels(tenant):
+        return json.load(open("data/label_map/tenant.json","r"))
+
     def load_vectorizer(tenant):
         vectorizer = CountVectorizer(min_df=0, lowercase=False, max_features=100)
+        vectorizer = CountVectorizer(min_df=0, lowercase=False, max_features=max_len)
         f = open('deeplearning/vocab.txt', 'r', encoding='utf-8')
         vectorizer.fit(f.readlines())
         return vectorizer
@@ -42,14 +47,16 @@ class TransientModel:
         return features['features'], features['label']
 
     def train(self, tenant, label_map, train_df, test_df):
+        f = open("data/label_map/tenant.json","w+")
+        f.write(json.dumps(label_map))
+        f.close()
         train_df.drop(['_id'],axis=1,inplace=True)
         test_df.drop(['_id'],axis=1,inplace=True)
         train_df['label'].replace(label_map, inplace=True)
         test_df['label'].replace(label_map, inplace=True)
-        print(train_df)
         self.neural_network(train_df, test_df)
-        # self.model.save('data/model/' + tenant)
-
+        self.model.save('data/model/' + tenant)
+        
     def predict(self, sentence):
         feature_vector = self.vectorize_sentence([sentence])
         print(feature_vector)
@@ -58,7 +65,7 @@ class TransientModel:
         return prediction
 
     def initialize_vectorizer(self):
-        self.vectorizer = CountVectorizer(min_df=0, lowercase=False, max_features=100)
+        self.vectorizer = CountVectorizer(min_df=0, lowercase=False, max_features=max_len)
         f = open('deeplearning/vocab.txt', 'r', encoding='utf-8')
         self.vectorizer.fit(f.readlines())
         # self.vectorizer.fit(df['text'].values)
@@ -85,8 +92,10 @@ class TransientModel:
         layer = keras.layers.Embedding(max_words,50,input_length=max_len)(inputs)
         layer = keras.layers.Dense(256,name='FC1')(layer)
         layer = keras.layers.Activation('relu')(layer)
+        layer = keras.layers.Dense(256,name='FC2')(layer)
+        layer = keras.layers.Activation('relu')(layer)
         layer = keras.layers.Dropout(0.5)(layer)
-        layer = keras.layers.Dense(4,name='out_layer')(layer)
+        layer = keras.layers.Dense(18,name='out_layer')(layer)
         layer = keras.layers.Activation('sigmoid')(layer)
         model = keras.Model(inputs=inputs,outputs=layer)
         return model
@@ -99,7 +108,7 @@ class TransientModel:
         layer = keras.layers.Dense(256,name='FC1')(layer)
         layer = keras.layers.Activation('relu')(layer)
         layer = keras.layers.Dropout(0.5)(layer)
-        layer = keras.layers.Dense(4,name='out_layer')(layer)
+        layer = keras.layers.Dense(18,name='out_layer')(layer)
         layer = keras.layers.Activation('sigmoid')(layer)
         model = keras.Model(inputs=inputs,outputs=layer)
         return model
