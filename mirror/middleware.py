@@ -15,6 +15,7 @@ class JWTAuthenticationMiddleware(MiddlewareMixin):
         try:
             claim = jwt.decode(request.headers.get('authorization'), 'jwtsecret', algorithms=['HS256'])
             request.claim = claim
+            request.user_id = claim.get('userId')
         except jwt.exceptions.DecodeError:
             raise PermissionDenied
         

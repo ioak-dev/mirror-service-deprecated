@@ -2,17 +2,23 @@ from pymongo import MongoClient
 from library.db_connection_factory import get_collection
 from bson.objectid import ObjectId
 import os
+from datetime import datetime
 
 DATABASE_URI = os.environ.get('DATABASE_URI')
 
-def find(tenant, collection_name, search_criteria):
+def find(tenant, collection_name, search_criteria, user_id = None):
     data = get_collection(tenant, collection_name).find(search_criteria)
     data = list(data)
     data = clean_array(data)
     return data
 
-def upsert(tenant, collection_name, data):
+def upsert(tenant, collection_name, data, user_id = None):
+    now = datetime.now()
+    data['lastModifiedBy'] = user_id
+    data['lastModifiedAt'] = now
     if data.get('id') is None:
+        data['createdBy'] = user_id
+        data['createdAt'] = now
         response = get_collection(tenant, collection_name).insert_one(data)
         record = get_collection(tenant, collection_name).find_one({'_id': response.inserted_id})
         return clean_object(record)
@@ -27,7 +33,7 @@ def upsert(tenant, collection_name, data):
         updated_record = clean_object(updated_record)
         return updated_record
 
-def delete(tenant, collection_name, search_criteria):
+def delete(tenant, collection_name, search_criteria, user_id = None):
     search_criteria = declean_object(search_criteria)
     result = get_collection(tenant, collection_name).delete_many(search_criteria)
     return result
