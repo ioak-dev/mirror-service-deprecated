@@ -6,8 +6,8 @@ import servicerequests.service as service
 @api_view(['GET', 'PUT'])
 def get_update_sr(request, tenant):
     if request.method == 'GET':
-        response = service.do_get_sr(tenant)
+        response = service.do_get_sr(request, tenant)
         return JsonResponse(response[1], status=response[0])
     if request.method == 'PUT':
-        response = service.do_add_update_sr(tenant, request.body)
+        response = service.do_add_update_sr(request, tenant)
         return JsonResponse(response[1], status=response[0])
