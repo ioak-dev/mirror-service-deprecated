@@ -5,5 +5,5 @@ from . import views
 
 urlpatterns =[
     path('main', views.sr_main),
-    path('log', views.sr_log)
+    path('log/<str:request_id>', views.sr_log)
 ]

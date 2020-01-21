@@ -13,10 +13,10 @@ def sr_main(request, tenant):
         return JsonResponse(response[1], status=response[0])
 
 @api_view(['GET', 'PUT'])
-def sr_log(request, tenant):
+def sr_log(request, tenant, request_id):
     if request.method == 'GET':
-        response = service.get_sr_log(request, tenant)
+        response = service.get_sr_log(request, tenant, request_id)
         return JsonResponse(response[1], status=response[0])
     if request.method == 'PUT':
-        response = service.update_sr_log(request, tenant)
+        response = service.update_sr_log(request, tenant, request_id)
         return JsonResponse(response[1], status=response[0])
