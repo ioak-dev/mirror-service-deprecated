@@ -4,10 +4,19 @@ from django.core import serializers
 import servicerequests.service as service
 
 @api_view(['GET', 'PUT'])
-def get_update_sr(request, tenant):
+def sr_main(request, tenant):
     if request.method == 'GET':
-        response = service.do_get_sr(tenant)
+        response = service.get_sr_main(request, tenant)
         return JsonResponse(response[1], status=response[0])
     if request.method == 'PUT':
-        response = service.do_add_update_sr(tenant, request.body)
+        response = service.update_sr_main(request, tenant)
+        return JsonResponse(response[1], status=response[0])
+
+@api_view(['GET', 'PUT'])
+def sr_log(request, tenant, request_id):
+    if request.method == 'GET':
+        response = service.get_sr_log(request, tenant, request_id)
+        return JsonResponse(response[1], status=response[0])
+    if request.method == 'PUT':
+        response = service.update_sr_log(request, tenant, request_id)
         return JsonResponse(response[1], status=response[0])

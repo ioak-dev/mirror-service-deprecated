@@ -4,5 +4,6 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns =[
-    path('', views.get_update_sr)
+    path('main', views.sr_main),
+    path('log/<str:request_id>', views.sr_log)
 ]
