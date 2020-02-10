@@ -5,5 +5,5 @@ from . import views
 
 urlpatterns =[
     path('<str:id>', views.get),
-    path('', views.get_all)
+    path('', views.do)
 ]

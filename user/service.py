@@ -20,7 +20,7 @@ def expand_authors(tenant, data):
         item['createdByEmail'] = created_by[0].get('email')
     return data
 
-def update_user(request, tenant, id):
-    print(request.body, id)
-    updated_record = db_utils.upsert(tenant, domain, request.body, id)
+def update_user(request, tenant):
+    print(request.body)
+    updated_record = db_utils.upsert(tenant, domain, request.body, request.user_id)
     return (200, {'data': updated_record})
