@@ -5,7 +5,7 @@ import user.service as service
 
 @api_view(['GET'])
 def get(request, tenant, id):
-    response = service.find(request, tenant, id)
+    response = service.find(tenant, id)
     return JsonResponse(response[1], status=response[0])
 
 @api_view(['GET'])
