@@ -21,6 +21,12 @@ def expand_authors(tenant, data):
         item['createdByEmail'] = created_by[0].get('email')
     return data
 
+def update_user(request, tenant):
+    print(request.body)
+    updated_record = db_utils.upsert(tenant, domain, request.body, request.user_id)
+    return (200, {'data': updated_record})
+
+
 def find_permitted_actions(tenant, user_id):
     roles = db_utils.find(tenant, domain, {'_id': user_id})[0].get('role')
     return db_utils.find(tenant, domain_role_permissions, {'role': {'$in': roles}})
