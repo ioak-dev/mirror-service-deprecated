@@ -4,7 +4,7 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns =[
-    path('<str:id>', views.get),
     path('', views.do),
+    path('all', views.get_all),
     path('permittedActions', views.permittedActions)
 ]

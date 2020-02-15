@@ -5,8 +5,8 @@ import library.db_utils as db_utils
 domain = 'user'
 domain_role_permissions = 'role_permissions'
 
-def find(tenant, id):
-    data = db_utils.find(tenant, domain, {'_id': id})
+def find(request, tenant):
+    data = db_utils.find(tenant, domain, {'_id': request.user_id})
     return (200, {'data': data})
 
 def find_all(request, tenant):
