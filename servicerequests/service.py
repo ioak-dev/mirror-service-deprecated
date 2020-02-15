@@ -13,8 +13,8 @@ def get_sr_main(request, tenant):
     condition = None
     if can_i_perform(permitted_actions, 'read', domain, "all"):
         condition = {}
-    elif can_i_perform(permitted_actions, 'read', domain, "assigned to my group"):
-        condition = {'$or': [{'assignedTo': {'$in': who_can_perform(permitted_actions, 'read', domain, "assigned to my group")}}, {'createdBy': request.user_id}]}
+    elif can_i_perform(permitted_actions, 'read', domain, "assigned to group"):
+        condition = {'$or': [{'assignedTo': {'$in': who_can_perform(permitted_actions, 'read', domain, "assigned to group")}}, {'createdBy': request.user_id}]}
     elif can_i_perform(permitted_actions, 'read', domain, "created by me"):
         condition = {'createdBy': request.user_id}
     data = db_utils.find(tenant, domain_sr_main, condition)

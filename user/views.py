@@ -16,3 +16,8 @@ def do(request, tenant):
     elif request.method == 'PUT':
         response = service.update_user(request, tenant)
         return JsonResponse(response[1], status=response[0])
+
+@api_view(['GET'])
+def permittedActions(request, tenant):
+    response = service.find_permitted_actions(tenant, request.user_id)
+    return (200, {'data': response})

@@ -28,7 +28,8 @@ def update_user(request, tenant):
 
 
 def find_permitted_actions(tenant, user_id):
-    roles = db_utils.find(tenant, domain, {'_id': user_id})[0].get('role')
+    roles = db_utils.find(tenant, domain, {'_id': user_id})[0].get('roles')
+    roles.append('open')
     return db_utils.find(tenant, domain_role_permissions, {'role': {'$in': roles}})
 
 def can_i_perform(permitted_actions, action, domain, condition, group=None):
@@ -41,7 +42,6 @@ def can_i_perform(permitted_actions, action, domain, condition, group=None):
 def who_can_perform(permitted_actions, action, domain, condition):
     group_list = []
     for item in permitted_actions:
-        print(item)
         if item.get('action') == action and item.get('domain') == domain and item.get('condition') == condition and item.get('group') != None:
                 group_list.append(item.get('group'))
     return group_list

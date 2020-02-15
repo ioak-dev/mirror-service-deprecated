@@ -5,5 +5,6 @@ from . import views
 
 urlpatterns =[
     path('<str:id>', views.get),
-    path('', views.do)
+    path('', views.do),
+    path('permittedActions', views.permittedActions)
 ]
