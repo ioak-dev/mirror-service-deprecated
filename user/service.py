@@ -6,11 +6,11 @@ domain = 'user'
 domain_role_permissions = 'role_permissions'
 
 def find(request, tenant):
-    data = db_utils.find(tenant, domain, {'_id': request.user_id})
+    data = remove_sensitive_data(db_utils.find(tenant, domain, {'_id': request.user_id}))
     return (200, {'data': data})
 
 def find_all(request, tenant):
-    data = db_utils.find(tenant, domain, {})
+    data = remove_sensitive_data(db_utils.find(tenant, domain, {}))
     return (200, {'data': data})
 
 def expand_authors(tenant, data):
@@ -45,3 +45,10 @@ def who_can_perform(permitted_actions, action, domain, condition):
         if item.get('action') == action and item.get('domain') == domain and item.get('condition') == condition and item.get('group') != None:
                 group_list.append(item.get('group'))
     return group_list
+
+def remove_sensitive_data(data):
+    for item in data:
+        del item['problem']
+        del item['solution']
+    return data
+
