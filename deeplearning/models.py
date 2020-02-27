@@ -18,7 +18,7 @@ from tensorflow.keras.preprocessing import sequence
 
 max_words = 10000
 # time series i believe. set max_len to 1 for non-RNN
-max_len = 150
+max_len = 1
 
 class TransientModel:
     def __init__(self, tenant):
@@ -55,7 +55,7 @@ class TransientModel:
         train_df['label'].replace(label_map, inplace=True)
         test_df['label'].replace(label_map, inplace=True)
         self.neural_network(train_df, test_df)
-        self.model.save('data/model/' + tenant)
+        self.model.save('data\\model\\' + tenant)
         
     def predict(self, sentence):
         feature_vector = self.vectorize_sentence([sentence])
