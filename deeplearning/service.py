@@ -8,7 +8,7 @@ from deeplearning.models import TransientModel, ModelContainer
 import library.nlp_utils as nlp_utils
 from sklearn.model_selection import train_test_split
 import library.collection_utils as collection_utils
-import tensorflow as tf
+# import tensorflow as tf
 import deeplearning.tasks as tasks
 from celery.result import AsyncResult
 

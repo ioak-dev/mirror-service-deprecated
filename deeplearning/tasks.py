@@ -2,7 +2,7 @@ from mirror.celery import app
 from library.db_connection_factory import get_collection
 from deeplearning.models import TransientModel, ModelContainer
 from library.collection_utils import list_to_dict
-import tensorflow as tf
+# import tensorflow as tf
 import pandas as pd
 # from celery.decorators import shared_task
 
