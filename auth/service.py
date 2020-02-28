@@ -2,8 +2,11 @@ import os, datetime, time
 from pymongo import MongoClient
 import secrets, jwt
 from library.db_connection_factory import get_collection
+import library.db_utils as db_utils
 
 DATABASE_URI = os.environ.get('DATABASE_URI')
+
+domain="user"
 
 def generate_keys():
     return (200, {
@@ -13,18 +16,23 @@ def generate_keys():
 
 def get_keys(tenant, email):
     user = get_collection(tenant, 'user').find_one({'email': email})
+    #user = db_utils.find(tenant,domain,{'email': email})
     if user is None:
         return (404, {})
     else:
         return (200, {'problem': user.get('problem')})
 
 def do_signup(tenant, data):
-    user = get_collection(tenant, 'user').insert_one(data)
-    return (200, {'_id': str(user.inserted_id)})
+    print(data)
+    #user = get_collection(tenant, 'user').insert_one(data)
+    user = db_utils.upsert(tenant, domain, data)
+    #return (200, {'_id': str(user.inserted_id)})
+    return (200, {'_id': user})
 
 def do_signin(tenant, data):
     user = get_collection(tenant, 'user').find_one({'email': data.get('email')})
-    response = {'content': {}}
+    #user = db_utils.find(tenant, domain, {'email': data.get('email')})
+    #response = {'content': {}}
     if user is None:
         return (404, {})
     elif user.get('solution') != data.get('solution'):
@@ -43,6 +51,7 @@ def do_signin(tenant, data):
 
 def do_jwttest(tenant):
     tenant=get_collection('mirror', 'tenant').find_one({'name': tenant})
+    #tenant = db_utils.find(tenant, domain,{'name': tenant})
     jwtPassword = tenant.get('jwtPassword')
     return (200, jwt.encode({
             'userId': '4587439657496t',
@@ -53,25 +62,41 @@ def do_jwttest(tenant):
 
 def do_signin_via_jwt(tenant, data):
     tenantData=get_collection('mirror', 'tenant').find_one({'name': tenant})
+    #tenantData = db_utils.find(tenant, domain, {'name': tenant})
     jwtPassword = tenantData.get('jwtPassword')
     jwtToken = data.get('jwtToken')
     tokenData = jwt.decode(jwtToken, jwtPassword, algorithm='HS256')
     user = get_collection(tenant, 'user').find_one({'email': tokenData.get('email')})
+    #user = db_utils.find(tenant, domain,{'email': tokenData.get('email')})
     if user is None:
-        get_collection(tenant, 'user').insert_one({
+        """ get_collection(tenant, 'user').insert_one({
+            'name': tokenData.get('name'),
+            'email': tokenData.get('email'),
+            'type': 'JWT_USER'
+        }) """
+        db_utils.upsert(tenant, domain,{
             'name': tokenData.get('name'),
             'email': tokenData.get('email'),
             'type': 'JWT_USER'
         })
     else:
-        get_collection(tenant, 'user').update({'_id': user.get('_id')},
+        """ get_collection(tenant, 'user').update({'_id': user.get('_id')},
         {
             'name': tokenData.get('name'),
             'email': tokenData.get('email'),
             'type': 'JWT_USER'
-        }, upsert=True)
+        }, upsert=True) """
+        db_utils.upsert(tenant, domain, {
+            {'_id': user.get('_id')},
+            {
+                'name': tokenData.get('name'),
+                'email': tokenData.get('email'),
+                'type': 'JWT_USER'
+            }
+        })
     
     user = get_collection(tenant, 'user').find_one({'email': tokenData.get('email')})
+    #user = db_utils.find(tenant, user, {'email': tokenData.get('email')})
     return (200, {
         'name': user.get('name'),
         'email': user.get('email'),

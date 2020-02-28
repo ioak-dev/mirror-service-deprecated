@@ -1,23 +1,19 @@
 import os, datetime, time
 from pymongo import MongoClient
 from library.db_connection_factory import get_collection
-from gridfs import GridFS
-import base64
-from bson.binary import Binary
-from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
-import json
+import library.db_utils as db_utils
+
+domain = 'stage'
 
 def do_get_stages(tenant):
-    existing_stage_list = get_collection(tenant,'stage').find()
-    existing_stage = []
-    for existing_stages in existing_stage_list:
-        existing_stages['_id'] = str(existing_stages['_id'])
-        existing_stage.append(existing_stages)
+    existing_stage = db_utils.find(tenant, domain,{})
     return (200, {'stage':existing_stage})
 
-def do_update_stages(tenant, list_stage_latest):
-    get_collection(tenant, 'stage').remove()
-    local_stage = get_collection(tenant, 'stage').insert_many(list_stage_latest)
+def do_update_stages(tenant, request):
+    #get_collection(tenant, 'stage').remove()
+    db_utils.delete(tenant, domain, {})
+    #updated_record = db_utils.upsert(tenant, domain,request.body, request.user_id)
+    local_stage = get_collection(tenant, 'stage').insert_many(request.body)
     return (200, {'_id': str(local_stage.inserted_ids)})
+    #return (200, {'data':updated_record})
     

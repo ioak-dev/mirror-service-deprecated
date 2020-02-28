@@ -11,6 +11,6 @@ def get_update_stages(request,tenant):
         response = service.do_get_stages(tenant)
         return JsonResponse(response[1], status=response[0])
     if request.method == 'PUT':
-        response = service.do_update_stages(tenant, request.body)
+        response = service.do_update_stages(tenant, request)
         return JsonResponse(response[1], status=response[0])
 

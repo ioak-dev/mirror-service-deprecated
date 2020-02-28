@@ -7,7 +7,7 @@ from datetime import datetime
 DATABASE_URI = os.environ.get('DATABASE_URI')
 
 def find(tenant, collection_name, search_criteria, user_id = None):
-    data = get_collection(tenant, collection_name).find(search_criteria)
+    data = get_collection(tenant, collection_name).find(declean_object(search_criteria))
     data = list(data)
     data = clean_array(data)
     return data
