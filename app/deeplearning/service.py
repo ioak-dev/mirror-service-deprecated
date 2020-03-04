@@ -4,12 +4,12 @@ from library.db_connection_factory import get_collection
 import pandas as pd
 from io import StringIO
 import os, json, time
-from deeplearning.models import TransientModel, ModelContainer
+from app.deeplearning.models import TransientModel, ModelContainer
 import library.nlp_utils as nlp_utils
 from sklearn.model_selection import train_test_split
 import library.collection_utils as collection_utils
 # import tensorflow as tf
-import deeplearning.tasks as tasks
+import app.deeplearning.tasks as tasks
 from celery.result import AsyncResult
 
 DATABASE_URI = os.environ.get('DATABASE_URI')

@@ -1,7 +1,7 @@
 from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view
 from django.core import serializers
-import stage.service as service
+import app.stage.service as service
 #from stage.service import do_update_stages, do_get_stages
 import json, base64
 

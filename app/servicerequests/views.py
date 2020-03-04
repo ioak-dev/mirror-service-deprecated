@@ -1,7 +1,7 @@
 from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view
 from django.core import serializers
-import servicerequests.service as service
+import app.servicerequests.service as service
 
 @api_view(['GET', 'PUT'])
 def sr_main(request, tenant):

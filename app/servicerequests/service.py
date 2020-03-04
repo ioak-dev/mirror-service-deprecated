@@ -2,7 +2,7 @@ import os, datetime, time, random
 from pymongo import mongo_client
 from bson.objectid import ObjectId
 import library.db_utils as db_utils
-from user.service import expand_authors, find_permitted_actions, can_i_perform, who_can_perform
+from app.user.service import expand_authors, find_permitted_actions, can_i_perform, who_can_perform
 
 domain = "servicerequests"
 domain_sr_main="servicerequests.main"

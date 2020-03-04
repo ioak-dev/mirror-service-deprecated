@@ -1,7 +1,7 @@
 from csv import reader
 from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view
-import deeplearning.service as service
+import app.deeplearning.service as service
 
 # Create your views here.
 

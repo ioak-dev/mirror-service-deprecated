@@ -7,7 +7,7 @@ BAD_SYMBOLS_RE = re.compile('[^0-9a-z #+_]')
 STOPWORDS = [line.rstrip('\n') for line in open('library/nltk_data/corpora/stopwords/english', 'r')]
 
 def clean_text(text):
-    text = BeautifulSoup(text, "lxml").text # HTML decoding
+    # text = BeautifulSoup(text, "lxml").text # HTML decoding
     text = text.lower() # lowercase text
     # text = text.encode('ascii', errors='ignore').decode("utf-8")
     # text = text.encode('ascii', errors='ignore').decode("unicode_escape")

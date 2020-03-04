@@ -23,11 +23,11 @@ urlpatterns = [
     path('task/<str:task_id>/status', views.get_status),
     path('task/<str:task_id>/result', views.get_result),
     path('admin/<str:tenant>/', admin.site.urls),
-    path('auth/<str:tenant>/', include('auth.urls')),
-    path('tenant/', include('tenant.urls')),
-    path('deeplearning/<str:tenant>/', include('deeplearning.urls')),
-    path('stage/<str:tenant>/', include('stage.urls')),
-    path('faq/<str:tenant>/', include('faq.urls')),
-    path('servicerequests/<str:tenant>/', include('servicerequests.urls')),
-    path('user/<str:tenant>/', include('user.urls'))
+    path('auth/<str:tenant>/', include('app.auth.urls')),
+    path('tenant/', include('app.tenant.urls')),
+    path('deeplearning/<str:tenant>/', include('app.deeplearning.urls')),
+    path('stage/<str:tenant>/', include('app.stage.urls')),
+    path('faq/<str:tenant>/', include('app.faq.urls')),
+    path('servicerequests/<str:tenant>/', include('app.servicerequests.urls')),
+    path('user/<str:tenant>/', include('app.user.urls'))
 ]
