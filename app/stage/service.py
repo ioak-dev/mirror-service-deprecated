@@ -9,11 +9,10 @@ def do_get_stages(tenant):
     existing_stage = db_utils.find(tenant, domain,{})
     return (200, {'stage':existing_stage})
 
-def do_update_stages(tenant, request):
-    #get_collection(tenant, 'stage').remove()
-    db_utils.delete(tenant, domain, {})
-    #updated_record = db_utils.upsert(tenant, domain,request.body, request.user_id)
-    local_stage = get_collection(tenant, 'stage').insert_many(request.body)
-    return (200, {'_id': str(local_stage.inserted_ids)})
-    #return (200, {'data':updated_record})
-    
+def do_update_stages(tenant, data, user_id):
+    updated_record = db_utils.upsert(tenant, domain,data, user_id)
+    return (200, {'data':updated_record})
+
+def do_delete_stage(request, tenant, id):
+    result = db_utils.delete(tenant, domain, {'_id': id}, request.user_id)
+    return (200, {'deleted_count': result.deleted_count})

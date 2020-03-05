@@ -6,15 +6,20 @@ import base64
 from bson.binary import Binary
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+from library import db_utils
+from app.stage.service import do_update_stages
+from app.user.service import update_user
 
-DATABASE_URI = os.environ.get('DATABASE_URI')
+domain = 'mirror'
+doamin_tenant = 'tenant'
 
 def do_create(data_in, banner):
     data = data_in.copy()
     if banner != None:
         data['banner'] = banner.read()
-    tenant = get_collection('mirror','tenant').insert_one(data)
-    return (200, {'_id': str(tenant.inserted_id)})
+    tenant = db_utils.upsert(domain, doamin_tenant, data)
+    do_update_stages(data['name'],{'name':'Support'}, None)
+    return (200, {'_id': tenant})
 
 def do_get_banner(tenant):
     tenantData = get_collection('mirror','tenant').find_one({'name': tenant})

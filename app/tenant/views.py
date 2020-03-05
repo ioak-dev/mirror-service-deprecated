@@ -20,7 +20,8 @@ def create(request):
         response = do_signup(request.POST.get('tenantName'), {
             'email': request.POST.get('email'),
             'problem': request.POST.get('problem'),
-            'solution': request.POST.get('solution')
+            'solution': request.POST.get('solution'),
+            'roles' : request.POST.get('roles')
         })
         return JsonResponse(response[1], status=response[0])
     else:
