@@ -51,5 +51,4 @@ def load_labels(request, tenant):
 @api_view(['POST'])
 def predict(request, tenant):
     response = service.predict(tenant, request.body.decode('utf-8'))
-    print('Request body: ' + request.body.decode('utf-8'))
     return JsonResponse(response[1], status=response[0])

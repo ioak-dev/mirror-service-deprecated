@@ -12,11 +12,13 @@ from library.collection_utils import list_to_dict
 # import tensorflow as tf
 import app.learning.tasks as tasks
 from celery.result import AsyncResult
+import numpy as np
 
 
 DATABASE_URI = os.environ.get('DATABASE_URI')
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
 CELERY_BROKER_URL = None
+
 def add_dataset(tenant, csv_data):
     df = pd.read_csv(StringIO(csv_data))
     df = df.dropna()
@@ -85,32 +87,17 @@ def load_labels(tenant):
     return (200, label_map)
 
 def predict(tenant, sentence):
-    """model, vectorizer = ModelContainer.get(tenant)
-    sentence = nlp_utils.clean_text(sentence)
-    feature_vector = vectorizer.transform([sentence]).toarray()
-    prediction = model.predict(feature_vector)
-    print(prediction)
-    ranks = prediction[0].argsort().argsort()
-    label_map = collection_utils.dict_invert(TransientModel.load_labels(tenant))
-    outcome = []
-    for i in range(len(prediction[0])):
-        outcome.append({
-            'label': label_map.get(i),
-            'rank': str(ranks[i]),
-            'probability': str(prediction[0][i])
-        })
-    return (200, {'sentence': sentence, 'prediction': outcome})
-    # return (200, {'sentence': sentence})
-    """
     model = TransientModel(tenant)
     prediction = model.prediction(tenant, sentence)
-    ranks = prediction[0].argsort()
+    ranks = np.argsort(-prediction[0])
+    print(np.argsort(-prediction[0]))
+    print(prediction[0])
     outcome = []
     for i in range(len(prediction[0])):
         outcome.append({
-            'label': prediction[1][i],
-            'rank': str(ranks[i]),
-            'probability': str(prediction[0][i])
+            'label': prediction[1][ranks[i]],
+            'rank': i,
+            'probability': str(prediction[0][ranks[i]])
         })
     return (200, {'sentence': sentence, 'prediction': outcome})
 
