@@ -25,7 +25,7 @@ urlpatterns = [
     path('admin/<str:tenant>/', admin.site.urls),
     path('auth/<str:tenant>/', include('app.auth.urls')),
     path('tenant/', include('app.tenant.urls')),
-    path('deeplearning/<str:tenant>/', include('app.deeplearning.urls')),
+    path('learning/<str:tenant>/', include('app.learning.urls')),
     path('stage/<str:tenant>/', include('app.stage.urls')),
     path('faq/<str:tenant>/', include('app.faq.urls')),
     path('servicerequests/<str:tenant>/', include('app.servicerequests.urls')),

@@ -4,13 +4,15 @@ from library.db_connection_factory import get_collection
 import pandas as pd
 from io import StringIO
 import os, json, time
-from app.deeplearning.models import TransientModel, ModelContainer
+from app.learning.models import TransientModel, ModelContainer
 import library.nlp_utils as nlp_utils
 from sklearn.model_selection import train_test_split
 import library.collection_utils as collection_utils
+from library.collection_utils import list_to_dict
 # import tensorflow as tf
-import app.deeplearning.tasks as tasks
+import app.learning.tasks as tasks
 from celery.result import AsyncResult
+
 
 DATABASE_URI = os.environ.get('DATABASE_URI')
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
@@ -70,17 +72,20 @@ def train_model(tenant):
 #         return (200, {'async_task_id': task_result.id})
 
 def load_model(tenant):
-    model = TransientModel.load_model(tenant)
-    vectorizer = TransientModel.load_vectorizer(tenant)
-    ModelContainer.add(tenant, model, vectorizer)
+    model = TransientModel(tenant)
+    model.load_model(tenant)
     return (200, {})
+    """vectorizer = TransientModel.load_vectorizer(tenant)
+    ModelContainer.add(tenant, model, vectorizer)
+    return (200, {})"""
+
 
 def load_labels(tenant):
     label_map = TransientModel.load_labels(tenant)
     return (200, label_map)
 
 def predict(tenant, sentence):
-    model, vectorizer = ModelContainer.get(tenant)
+    """model, vectorizer = ModelContainer.get(tenant)
     sentence = nlp_utils.clean_text(sentence)
     feature_vector = vectorizer.transform([sentence]).toarray()
     prediction = model.predict(feature_vector)
@@ -96,3 +101,16 @@ def predict(tenant, sentence):
         })
     return (200, {'sentence': sentence, 'prediction': outcome})
     # return (200, {'sentence': sentence})
+    """
+    model = TransientModel(tenant)
+    prediction = model.prediction(tenant, sentence)
+    ranks = prediction[0].argsort()
+    outcome = []
+    for i in range(len(prediction[0])):
+        outcome.append({
+            'label': prediction[1][i],
+            'rank': str(ranks[i]),
+            'probability': str(prediction[0][i])
+        })
+    return (200, {'sentence': sentence, 'prediction': outcome})
+

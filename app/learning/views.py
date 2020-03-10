@@ -1,7 +1,7 @@
 from csv import reader
 from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view
-import app.deeplearning.service as service
+import app.learning.service as service
 
 # Create your views here.
 
@@ -51,4 +51,5 @@ def load_labels(request, tenant):
 @api_view(['POST'])
 def predict(request, tenant):
     response = service.predict(tenant, request.body.decode('utf-8'))
+    print('Request body: ' + request.body.decode('utf-8'))
     return JsonResponse(response[1], status=response[0])
