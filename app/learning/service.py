@@ -1,6 +1,8 @@
 import os, datetime, time
+import pymongo
 from pymongo import MongoClient
 from library.db_connection_factory import get_collection
+import library.db_utils as db_utils
 import pandas as pd
 from io import StringIO
 import os, json, time
@@ -19,7 +21,15 @@ DATABASE_URI = os.environ.get('DATABASE_URI')
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
 CELERY_BROKER_URL = None
 
+def get_all_tenants():
+    tenants = db_utils.find('mirror','tenant',{})
+    #print(tenants)
+    #client = pymongo.MongoClient("localhost", 27017, maxPoolSize=50)
+    #tenants = client.list_database_names()
+    return tenants
+
 def add_dataset(tenant, csv_data):
+    print(tenant)
     df = pd.read_csv(StringIO(csv_data))
     df = df.dropna()
     train_df, test_df = train_test_split(df, train_size=0.8, stratify=df['label'])

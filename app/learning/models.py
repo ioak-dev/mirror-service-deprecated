@@ -15,6 +15,7 @@ from sklearn.feature_extraction.text import CountVectorizer,TfidfVectorizer
 from sklearn import metrics
 import pickle
 from pathlib import Path
+import os
 
 from library.db_connection_factory import get_collection
 # from tensorflow.keras.optimizers import RMSprop
@@ -74,7 +75,7 @@ class TransientModel:
         df.text=df.text.fillna(' ')
         X_train, X_test, y_train, y_test = train_test_split(df.text, df.label, train_size=0.8, stratify=df.label)
 
-        vectorizer=TfidfVectorizer(sublinear_tf=True, min_df=5, norm='l2', ngram_range=(1, 2), stop_words='english', use_idf=True, max_df=.1, max_features=max_words)
+        vectorizer=TfidfVectorizer(sublinear_tf=True, min_df=1, norm='l2', ngram_range=(1, 2), stop_words='english', use_idf=True, max_df=.1, max_features=max_words)
         vectorizer = vectorizer.fit(X_train)
         X_train=vectorizer.transform(X_train)
         X_test=vectorizer.transform(X_test)
@@ -96,7 +97,9 @@ class TransientModel:
         top_n_accuracy = matches / y_test.shape[0]
         print('Misclassified samples: {}'.format(y_test.shape[0] - matches))
         print('Accuracy: {:.2f}'.format(top_n_accuracy))
-
+        
+        pathname=os.path.join(trained_models_dir,tenant)
+        Path(pathname).mkdir(parents=True, exist_ok=True)
         pickle.dump(classifier, open(trained_models_dir / tenant / 'model.sav', 'wb'))
         pickle.dump(vectorizer, open(trained_models_dir / tenant / 'vectorizer.sav', 'wb'))
         pickle.dump(dict((v, k) for k, v in computed_labels.items()), open(trained_models_dir / tenant / 'label.sav', 'wb'))
