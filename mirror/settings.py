@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'deeplearning'
+    'app.learning'
 ]
 
 MIDDLEWARE = [
