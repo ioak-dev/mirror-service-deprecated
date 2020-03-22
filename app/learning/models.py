@@ -42,13 +42,13 @@ class TransientModel:
         plt.style.use('ggplot')
 
     def load_model(self, tenant):
-        print(trained_models_dir)
-        print(tenant)
-        # return keras.models.load_model('data/model/' + tenant)
-        all_models[tenant] = pickle.load(open(trained_models_dir / tenant / 'model.sav', 'rb'))
-        all_vectorizers[tenant] = pickle.load(open(trained_models_dir / tenant / 'vectorizer.sav', 'rb'))
-        all_labels[tenant] = pickle.load(open(trained_models_dir / tenant / 'label.sav', 'rb'))
-        return "trained model read successful"
+        if os.path.exists(trained_models_dir / tenant / 'model.sav'):
+            all_models[tenant] = pickle.load(open(trained_models_dir / tenant / 'model.sav', 'rb'))
+            all_vectorizers[tenant] = pickle.load(open(trained_models_dir / tenant / 'vectorizer.sav', 'rb'))
+            all_labels[tenant] = pickle.load(open(trained_models_dir / tenant / 'label.sav', 'rb'))
+            return "trained model read successful"
+        else:
+            return 'no trained model present'
 
     def load_labels(self, tenant):
         return json.load(open("data/label_map/tenant.json","r"))
@@ -64,46 +64,49 @@ class TransientModel:
         df = pd.DataFrame(list(get_collection(tenant, 'dataset_train').find({})))
         computed_labels = {}
         index = 0
-        for label_item in df['label']:
-            try:
-                computed_labels[label_item.lstrip().rstrip()]
-            except KeyError:
-                computed_labels[label_item.lstrip().rstrip()] = index
-                index = index + 1
-        df.replace(computed_labels, inplace=True)
-
-        df.text=df.text.fillna(' ')
-        X_train, X_test, y_train, y_test = train_test_split(df.text, df.label, train_size=0.8, stratify=df.label)
-
-        vectorizer=TfidfVectorizer(sublinear_tf=True, min_df=1, norm='l2', ngram_range=(1, 2), stop_words='english', use_idf=True, max_df=.1, max_features=max_words)
-        vectorizer = vectorizer.fit(X_train)
-        X_train=vectorizer.transform(X_train)
-        X_test=vectorizer.transform(X_test)
-        classifier = LogisticRegression(solver = 'lbfgs', multi_class = 'multinomial', max_iter=200)
-        classifier.fit(X_train, y_train)
-        y_pred = classifier.predict(X_test)
-        y_pred_proba = classifier.predict_proba(X_test)
-
-        count_misclassified = (y_test != y_pred).sum()
-        print('Misclassified samples: {}'.format(count_misclassified))
-        accuracy = metrics.accuracy_score(y_test, y_pred)
-        print('Accuracy: {:.2f}'.format(accuracy))
-
-        print(ml_model, vectorizer_type, n)
-        matches = 0
-        for x in range(0, y_pred_proba.shape[0]):
-            if y_test.iloc[x] in np.argsort(y_pred_proba[x])[::-1][:n]:
-                matches = matches + 1
-        top_n_accuracy = matches / y_test.shape[0]
-        print('Misclassified samples: {}'.format(y_test.shape[0] - matches))
-        print('Accuracy: {:.2f}'.format(top_n_accuracy))
-        
         pathname=os.path.join(trained_models_dir,tenant)
         Path(pathname).mkdir(parents=True, exist_ok=True)
-        pickle.dump(classifier, open(trained_models_dir / tenant / 'model.sav', 'wb'))
-        pickle.dump(vectorizer, open(trained_models_dir / tenant / 'vectorizer.sav', 'wb'))
-        pickle.dump(dict((v, k) for k, v in computed_labels.items()), open(trained_models_dir / tenant / 'label.sav', 'wb'))
-        return "training successful"
+        if len(df) > 0:
+            for label_item in df['label']:
+                try:
+                    computed_labels[label_item.lstrip().rstrip()]
+                except KeyError:
+                    computed_labels[label_item.lstrip().rstrip()] = index
+                    index = index + 1
+            df.replace(computed_labels, inplace=True)
+
+            df.text=df.text.fillna(' ')
+            X_train, X_test, y_train, y_test = train_test_split(df.text, df.label, train_size=0.8, stratify=df.label)
+
+            vectorizer=TfidfVectorizer(sublinear_tf=True, min_df=1, norm='l2', ngram_range=(1, 2), stop_words='english', use_idf=True, max_df=.1, max_features=max_words)
+            vectorizer = vectorizer.fit(X_train)
+            X_train=vectorizer.transform(X_train)
+            X_test=vectorizer.transform(X_test)
+            classifier = LogisticRegression(solver = 'lbfgs', multi_class = 'multinomial', max_iter=200)
+            classifier.fit(X_train, y_train)
+            y_pred = classifier.predict(X_test)
+            y_pred_proba = classifier.predict_proba(X_test)
+
+            count_misclassified = (y_test != y_pred).sum()
+            print('Misclassified samples: {}'.format(count_misclassified))
+            accuracy = metrics.accuracy_score(y_test, y_pred)
+            print('Accuracy: {:.2f}'.format(accuracy))
+
+            print(ml_model, vectorizer_type, n)
+            matches = 0
+            for x in range(0, y_pred_proba.shape[0]):
+                if y_test.iloc[x] in np.argsort(y_pred_proba[x])[::-1][:n]:
+                    matches = matches + 1
+            top_n_accuracy = matches / y_test.shape[0]
+            print('Misclassified samples: {}'.format(y_test.shape[0] - matches))
+            print('Accuracy: {:.2f}'.format(top_n_accuracy))
+
+            pickle.dump(classifier, open(trained_models_dir / tenant / 'model.sav', 'wb'))
+            pickle.dump(vectorizer, open(trained_models_dir / tenant / 'vectorizer.sav', 'wb'))
+            pickle.dump(dict((v, k) for k, v in computed_labels.items()), open(trained_models_dir / tenant / 'label.sav', 'wb'))
+            return "training successful"
+        else:
+            return "no training data"
         
     def prediction(self, tenant, data):
         pred_in = all_vectorizers[tenant].transform([data])
